@@ -20,8 +20,9 @@
  */
 
 //
-// any changes since 0.77 copyright 2005-2012 Maciej Bartosiak
+// changes for mac os x by Maciej Bartosiak
 //
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -30,16 +31,24 @@
 #include <stdint.h>
 #include <strings.h>
 
-#include "digit_ops.h"
-
 #include "utils.h"
+
+void *alloc (size_t size)
+{
+	void *p;
+	
+	p = calloc (1, size);
+	if (! p)
+		fatal (2, "Memory allocation failed\n");
+	return (p);
+}
 
 void trim_trailing_whitespace (char *s)
 {
 	int i;
 	char c;
 	
-	i = (int)strlen (s);
+	i = strlen (s);
 	while (--i >= 0)
     {
 		c = s [i];
@@ -102,19 +111,28 @@ void fatal (int ret, char *format, ...)
 	exit (ret);
 }
 
+/*void warning (char *format, ...)
+{
+	va_list ap;
+	
+	fprintf (stderr, "warning: ");
+	va_start (ap, format);
+	vfprintf (stderr, format, ap);
+	va_end (ap);
+}*/
+
 char* reg2str (char *str, reg_t reg)
 {
     static char hexmap[] = "0123456789abcdef";
-	int i = WSIZE - 1;
+    int i = WSIZE - 1;
     char *tmp = str;
-	
+    
     do {
         *tmp++ = hexmap[reg[i]];
     } while (i--);
     *tmp = 0;
     return str;
 }
-
 
 void str2reg(reg_t reg, const char *str)
 {
@@ -138,11 +156,3 @@ void str2reg(reg_t reg, const char *str)
 }
 
 
-void *alloc (size_t size)
-{
-	void *addr;
-	
-    addr = malloc (size);
-    memset(addr, 0, size);
-	return addr;
-}

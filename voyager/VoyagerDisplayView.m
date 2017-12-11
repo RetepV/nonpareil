@@ -99,7 +99,7 @@
 		[[NSString stringWithUTF8String: "PRGM"] drawAtPoint: NSMakePoint(273.0,ANNUNC_OFF)
 										withAttributes: attrs];
 	
-	[self setNeedsDisplay: NO];
+	[self setNeedsDisplay: YES];
 }
 
 //- (void)setupDisplayWith:(segment_bitmap_t *)disps count: (int)count
@@ -144,6 +144,17 @@
 	}
 	
 	digits = [[NSArray alloc] initWithArray: tmp];
+}
+
+- (void)updateDisplay
+{
+    //if (memcmp( cds, ds, MAX_DIGIT_POSITION))
+    //{
+    //	memcpy(cds, ds, MAX_DIGIT_POSITION);
+    [self setNeedsDisplay: YES];
+    //	NSLog(@"disp");
+    //}
+    
 }
 
 @end

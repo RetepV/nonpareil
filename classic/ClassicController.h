@@ -24,7 +24,7 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-10-08.
-//  Copyright 2005-2012 Maciej Bartosiak
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import <Cocoa/Cocoa.h>

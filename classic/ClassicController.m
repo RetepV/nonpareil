@@ -24,7 +24,7 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-10-08.
-//  Copyright 2005-2012 Maciej Bartosiak
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import "ClassicController.h"
@@ -38,40 +38,39 @@
 	[NSApp setDelegate:self];
 		
 	keyQueue = [[NSMutableArray alloc] init];
-	simulator = [[ClassicSimulator alloc] init];
-	simulator.display = display;
+	simulator = [[ClassicSimulator alloc] initWithDisplay: display];
 	//[display setupDisplayWith: [simulator displaySegments]
 	//					count: [simulator displayDigits]
 	//					withX: ((320.0 - (15.0 * DIGIT_W) - (DIGIT_S * 2.0) * 14.0)/2.0)/*CLASSIC_DIGIT_START_OFF*/
 	//						Y: 15.0];
-
+	
 	[display setupDisplayWith: [simulator displaySegments]
 						count: [simulator displayDigits]
-					  //yOffset: 18.0
-				  digitHeight: 20.0
-				   digitWidth: 9.0 
+					  yOffset: 18.0
+				  digitHeight: 14.0
+				   digitWidth: 7.0 
 				  digitOffset: 10.0
 				   digitShare: 0.0
 				  digitStroke: 1.3
 					dotOffset: 5.0];
 	
-	timer = [NSTimer scheduledTimerWithTimeInterval:(1.0/JIFFY_PER_SEC)
+	timer = [[NSTimer scheduledTimerWithTimeInterval:(1.0/JIFFY_PER_SEC)
 											  target:self
 											selector:@selector(run:)
 											userInfo:nil
-											 repeats:YES];
+											 repeats:YES] retain];
 	
 }
 
 - (IBAction)buttonPressed:(id)sender
 {
-	[keyQueue insertObject:[NSNumber numberWithInteger: [sender tag]] atIndex:0];
+	[keyQueue insertObject:[NSNumber numberWithInt: [sender tag]] atIndex:0];
 	[keyQueue insertObject:[NSNumber numberWithInt: -1] atIndex:0];
 }
 
 - (IBAction)modeSwitch:(id)sender
 {
-	NSInteger fff = [sender selectedSegment];
+	int fff = [sender selectedSegment];
 	if (fff == 2)
 	{
 		[simulator setFlag: 3 withBool:false];
@@ -99,10 +98,11 @@
 - (void)quit
 {
     [timer invalidate];
+    //if (! write_ram_file (ram))
+	[simulator printState];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-	[simulator saveState];
     [self quit];
 }
 

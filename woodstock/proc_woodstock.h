@@ -19,22 +19,11 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 MA 02111, USA.
 */
 
-//
-// any changes since 0.77 copyright 2005-2012 Maciej Bartosiak
-//
 
-//#define WSIZE 14
-//#define EXPSIZE 3  // two exponent and one exponent sign digit
+#define WSIZE 14
+#define EXPSIZE 3  // two exponent and one exponent sign digit
 
-#define WOODSTOCK_LEFT_SCAN (WSIZE - 1)
-#define WOODSTOCK_RIGHT_SCAN 2
-
-#define SPICE_LEFT_SCAN (WSIZE - 2)
-
-#define WOODSTOCK_DISPLAY_DIGITS 12
-#define SPICE_DISPLAY_DIGITS 11
-
-//typedef digit_t reg_t [WSIZE];
+typedef digit_t reg_t [WSIZE];
 
 
 #define SSIZE 16
@@ -58,84 +47,100 @@ typedef enum
   } inst_state_t;
 
 
-typedef struct woodstock_cpu_t
+typedef struct act_reg_t
 {
-    reg_t a;
-    reg_t b;
-    reg_t c;
-    reg_t y;
-    reg_t z;
-    reg_t t;
-    reg_t m1;
-    reg_t m2;
-    
-    digit_t f;
-    
-    digit_t p;
-    
-    bool decimal;
-    
-    bool carry, prev_carry;
-    
-    uint16_t s;
-    uint16_t ext_flag;
-    
-    uint16_t pc;
-    
-    bool del_rom_flag;
-    uint8_t del_rom;
-    
-    inst_state_t inst_state;
-    
-    int sp;  /* stack pointer */
-    uint16_t stack [STACK_SIZE];
-    
-    //int prev_pc;  /* used to store complete five-digit octal address of instruction */
-    
-    int crc;
-    
-    // keyboard
-    
-    bool key_flag;      /* true if a key is down */
-    int key_buf;        /* most recently pressed key */
-    
-    // display
-    
-    bool display_enable;
-    //bool display_14_digit;  // true after RESET TWF instruction
-    
-    void (* op_fcn [1024])(struct woodstock_cpu_t *act_reg, int opcode);
-        
-    // ROM:
-    uint8_t bank_exists [MAX_PAGE];
-    bool bank;                       // only a single global bank bit
-    rom_word_t *rom;
-    
-    // RAM:
-    uint16_t    max_ram;
-    uint16_t    ram_addr;  /* selected RAM address */
-    reg_t       *ram;
-    
-} cpu_t;
+  reg_t a;
+  reg_t b;
+  reg_t c;
+  reg_t y;
+  reg_t z;
+  reg_t t;
+  reg_t m1;
+  reg_t m2;
 
-cpu_t *spice_new_processor (int ram_size);
-cpu_t *woodstock_new_processor (int ram_size);
+  digit_t f;
 
-void woodstock_set_ext_flag (cpu_t *act_reg, int flag, bool state);
-bool woodstock_get_ext_flag (cpu_t *act_reg, int flag);
+  digit_t p;
 
-bool woodstock_execute_instruction (cpu_t *act_reg);
-bool spice_execute_instruction (cpu_t *act_reg);
+  bool decimal;
 
-bool woodstock_read_object_file (cpu_t *act_reg, const char *fn);
-void woodstock_set_object(cpu_t *act_reg, uint8_t *bank_exists, rom_word_t *rom);
+  bool carry, prev_carry;
 
-void woodstock_press_key (cpu_t *act_reg, int keycode);
-void woodstock_release_key (cpu_t *act_reg);
+  bool s [SSIZE];                 // ACT flags (status bits)
+  bool ext_flag [EXT_FLAG_SIZE];  // external flags, cause status or CRC
+                                     // bits to get set
 
-void woodstock_reset (cpu_t *act_reg);
-void spice_reset (cpu_t *act_reg);
-void woodstock_clear_memory (cpu_t *act_reg);
+  uint16_t pc;
 
-char* reg2str (char *str, reg_t reg);
-void str2reg(reg_t reg, const char *str);
+  bool del_rom_flag;
+  uint8_t del_rom;
+
+  inst_state_t inst_state;
+
+  int sp;  /* stack pointer */
+  uint16_t stack [STACK_SIZE];
+
+  int prev_pc;  /* used to store complete five-digit octal address of instruction */
+
+  int crc;
+
+  // keyboard
+
+  bool key_flag;      /* true if a key is down */
+  int key_buf;        /* most recently pressed key */
+
+  // display
+
+  bool display_enable;
+  bool display_14_digit;  // true after RESET TWF instruction
+
+  int left_scan;
+  int right_scan;
+  int display_scan_position;   /* word index, left_scan down to right_scan */
+  int display_digit_position;  /* character index, 0 to MAX_DIGIT_POSITION-1 */
+
+  void (* display_scan_fn) (struct act_reg_t *act_reg);
+
+  void (* op_fcn [1024])(struct act_reg_t *act_reg, int opcode);
+
+  // ROM:
+  uint8_t bank_exists [MAX_PAGE];  // bitmap
+  bool bank;                       // only a single global bank bit
+  rom_word_t *rom;
+  bool *rom_exists;
+  bool *rom_breakpoint;
+
+  // RAM:
+  int ram_addr;  /* selected RAM address */
+  reg_t *ram;
+  
+  uint16_t   max_ram;
+  
+  uint64_t cycle_count;
+  
+  // moved from sim_t;
+  segment_bitmap_t display_segments [MAX_DIGIT_POSITION];
+  segment_bitmap_t *char_gen;
+  int display_digits;
+  
+  //bool need_redraw;
+  void *display;
+  
+} act_reg_t;
+
+act_reg_t *spice_new_processor (int ram_size, void *display);
+act_reg_t *woodstock_new_processor (int ram_size, void *display);
+
+void woodstock_set_ext_flag (act_reg_t *act_reg, int flag, bool state);
+
+bool woodstock_execute_instruction (act_reg_t *act_reg);
+
+bool spice_execute_instruction (act_reg_t *act_reg);
+
+bool woodstock_read_object_file (act_reg_t *act_reg, const char *fn);
+
+void woodstock_press_key (act_reg_t *act_reg, int keycode);
+
+void woodstock_release_key (act_reg_t *act_reg);
+
+void display_callback(struct act_reg_t *ar);

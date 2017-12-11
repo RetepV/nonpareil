@@ -20,11 +20,13 @@
  */
 
 //
-// any changes since 0.77 copyright 2005-2012 Maciej Bartosiak
+// changes for mac os x by Maciej Bartosiak
 //
 
 #ifndef utils_h
 #define utils_h
+
+#include "digit_ops.h"
 
 #define WSIZE 14
 #define EXPSIZE 3  // two exponent and one exponent sign digit
@@ -33,19 +35,16 @@ typedef digit_t reg_t [WSIZE];
 typedef uint32_t addr_t;
 typedef uint16_t rom_word_t;
 
-void usage (FILE *f);
-void fatal (int ret, char *format, ...);
 void *alloc (size_t size);
-void warning (char *format, ...);
 void trim_trailing_whitespace (char *s);
 size_t fread_bytes  (FILE *stream,
-					 void *ptr,
-					 size_t byte_count,
-					 bool *eof,
-					 bool *error);
-
+                     void *ptr,
+                     size_t byte_count,
+                     bool *eof,
+                     bool *error);
+void fatal (int ret, char *format, ...);
+// void warning (char *format, ...);
 char* reg2str (char *str, reg_t reg);
 void str2reg(reg_t reg, const char *str);
-void *alloc(size_t size);
 
 #endif

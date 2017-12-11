@@ -24,7 +24,7 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-10-08.
-//  Copyright 2005-2012 Maciej Bartosiak.
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import <Cocoa/Cocoa.h>
@@ -34,7 +34,6 @@
 #ifdef NONPAREIL_35
 
 #define NNPR_OBJ	@"35"
-#define NNPR_STATE	@"state.nonpareil-35"
 #define NNPR_RAM	0
 #define NNPR_CLOCK	196000.0
 #define NNPR_WSIZE	56.0
@@ -42,7 +41,6 @@
 #elif NONPAREIL_45
 
 #define NNPR_OBJ	@"45"
-#define NNPR_STATE	@"state.nonpareil-45"
 #define NNPR_RAM	10
 #define NNPR_CLOCK	196000.0
 #define NNPR_WSIZE	56.0
@@ -50,15 +48,13 @@
 #elif NONPAREIL_55
 
 #define NNPR_OBJ	@"55"
-#define NNPR_STATE	@"state.nonpareil-55"
-#define NNPR_RAM	60
+#define NNPR_RAM	30
 #define NNPR_CLOCK	196000.0
 #define NNPR_WSIZE	56.0
 
 #elif NONPAREIL_80
 
 #define NNPR_OBJ	@"80"
-#define NNPR_STATE	@"state.nonpareil-80"
 #define NNPR_RAM	0
 #define NNPR_CLOCK	196000.0
 #define NNPR_WSIZE	56.0
@@ -69,33 +65,29 @@
 
 #endif
 
+#ifdef NONPAREIL_INTERNAL
 #import "display.h"
+#import "proc.h"
 #import "digit_ops.h"
-#import "utils.h"
 #import "proc_classic.h"
+#endif
 
 @interface ClassicSimulator : NSObject
 {
 	NSTimeInterval	lastRun;
-	LEDDisplayView *display;
+#ifdef NONPAREIL_INTERNAL
+	classic_cpu_reg_t *cpu;
 	
-	cpu_t *cpu;
-	
-	segment_bitmap_t display_segments [MAX_DIGIT_POSITION];
-
+	//segment_bitmap_t disp_buf[MAX_DIGIT_POSITION+1];
+	//segment_bitmap_t disp_old[MAX_DIGIT_POSITION+1];
+#endif
 }
-
-- (id)init;
+- (id)initWithDisplay: (LEDDisplayView *)display;
 - (void)pressKey: (int)key;
 - (void)readKeysFrom: (NSMutableArray *) keyQueue;
 - (void)executeCycle;
-- (BOOL)displayScan;
 - (void)setFlag: (int)num withBool: (BOOL)state;
 - (int)displayDigits;
 - (segment_bitmap_t *)displaySegments;
-- (void)saveState;
-- (void)readState;
-
-@property (nonatomic, strong) LEDDisplayView *display;
-
+- (BOOL)printState;
 @end

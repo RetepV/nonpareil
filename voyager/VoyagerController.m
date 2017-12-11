@@ -39,8 +39,11 @@
 		
 	keyQueue = [[NSMutableArray alloc] init];
 	
-	simulator = [[VoyagerSimulator alloc] init];
-	simulator.display = display;
+	//simulator = [[VoyagerSimulator alloc] init];
+	//simulator.display = display;
+    
+    simulator = [[VoyagerSimulator alloc] initWithDisplay: display];
+
 	//[display setupDisplayWith:[simulator displaySegments] count: [simulator displayDigits]];
 	[display setupDisplayWith: [simulator displaySegments]
 						count: [simulator displayDigits]

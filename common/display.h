@@ -23,7 +23,9 @@
 #define MAX_DIGIT_POSITION 15    /* Classic, Topcat, 67, maybe 19C */
 /* Digit positions are numbered left to right, starting with 0. */
 
-//#define MAX_SEGMENT 18           /* 41C: 14 segment char,3 segments punctuation, 1 annunciator */
+#define MAX_SEGMENT 18           /* 41C: 14 segment char,
+3 segments punctuation,
+1 annunciator */
 
 /* Segments are stored as a bitmap, with the LSB being segment A.
 See comments at the end of this header file. */

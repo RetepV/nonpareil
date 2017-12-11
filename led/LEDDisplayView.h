@@ -24,7 +24,7 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-10-26.
-//  Copyright 2005-2012 Maciej Bartosiak.
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import <Cocoa/Cocoa.h>
@@ -37,16 +37,18 @@
 	int dc;
 			
 	NSArray *digits;
+	
+	segment_bitmap_t cds [MAX_DIGIT_POSITION];
 }
 
 - (void)setupDisplayWith: (segment_bitmap_t *)disps
 				   count: (int) count
-				 //yOffset: (float) y
+				 yOffset: (float) y
 			 digitHeight: (float) digitHeight
 			  digitWidth: (float) digitWidth
 			 digitOffset: (float) digitOffset
 			  digitShare: (float) digitShare
 			 digitStroke: (float) digitStroke
 			   dotOffset: (float) dotOffset;
-
+- (void)updateDisplay;
 @end

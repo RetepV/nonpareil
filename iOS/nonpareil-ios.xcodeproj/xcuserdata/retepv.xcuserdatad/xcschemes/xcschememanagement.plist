@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>SchemeUserState</key>
+	<dict>
+		<key>nonpareil-ios-11c.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>2</integer>
+		</dict>
+		<key>nonpareil-ios-12c.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>3</integer>
+		</dict>
+		<key>nonpareil-ios-15c.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>4</integer>
+		</dict>
+		<key>nonpareil-ios-16c.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
+		<key>nonpareil-ios.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>0</integer>
+		</dict>
+	</dict>
+	<key>SuppressBuildableAutocreation</key>
+	<dict>
+		<key>0524B7931E0710AF00B5909A</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>0537CB501E0202D000FA3B19</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>0548B0E11E0080D600B40322</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>0548B0FF1E00813700B40322</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>05B12C7D1E03344200E874ED</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+	</dict>
+</dict>
+</plist>

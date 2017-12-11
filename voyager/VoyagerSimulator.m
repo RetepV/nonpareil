@@ -30,11 +30,29 @@
 #import "VoyagerSimulator.h"
 #import <math.h>
 
+#define VOYAGER_DISPLAY_BLINK_DIVISOR 150
+
 @implementation VoyagerSimulator
 
 @synthesize display;
 
-- (id)init
+- (id)initWithDisplay: (VoyagerDisplayView *)display
+{
+    self = [super init];
+    
+    NSBundle *nonpareilBundle = [NSBundle mainBundle];
+    NSString *objFile = [nonpareilBundle pathForResource: NNPR_OBJ ofType:@"obj"];
+    
+    cpu = nut_new_processor (NNPR_RAM, (__bridge void *)display);
+    nut_read_object_file (cpu, [objFile cString]);
+    
+    [self readState];
+    lastRun = [NSDate timeIntervalSinceReferenceDate];
+    
+    return self;
+}
+
+/*- (id)init
 {
     self = [super init];
 	
@@ -49,6 +67,7 @@
 	
 	return self;
 }
+ */
 
 - (void)pressKey: (int)key
 {
@@ -250,8 +269,8 @@ typedef struct
 	
 	cpu->prev_tef_last = [[stateDict objectForKey:@"prev_tef_last"] intValue];
     
-    cpu->s          = (uint16_t)[[stateDict objectForKey:@"s"] unsignedIntValue];
-    cpu->ext_flag   = (uint16_t)[[stateDict objectForKey:@"ext_flag"] unsignedIntValue];
+    *(uint16_t*)&(cpu->s)           = (uint16_t)[[stateDict objectForKey:@"s"] unsignedIntValue];
+    *(uint16_t*)&(cpu->ext_flag)    = (uint16_t)[[stateDict objectForKey:@"ext_flag"] unsignedIntValue];
     
     cpu->pc         = (uint16_t)[[stateDict objectForKey:@"pc"] unsignedIntValue];
     
@@ -399,3 +418,14 @@ typedef struct
 }
 
 @end
+
+void display_callback(struct nut_reg_t *nv)
+{
+    static segment_bitmap_t o_display_segments [MAX_DIGIT_POSITION];
+    
+    if (memcmp( o_display_segments, nv->display_segments, MAX_DIGIT_POSITION * sizeof(segment_bitmap_t)))
+    {
+        memcpy( o_display_segments, nv->display_segments, MAX_DIGIT_POSITION * sizeof(segment_bitmap_t));
+        [(__bridge VoyagerDisplayView *)nv->display updateDisplay];
+    }
+}

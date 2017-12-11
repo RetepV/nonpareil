@@ -54,7 +54,7 @@
 @implementation TransparentWindow
 
 - (id)initWithContentRect:(NSRect)contentRect
-				styleMask:(NSUInteger)aStyle
+				styleMask:(unsigned int)aStyle
 				  backing:(NSBackingStoreType)bufferingType
 					defer:(BOOL)flag
 {
@@ -69,7 +69,7 @@
     [result setLevel: NSNormalWindowLevel];
     [result setOpaque:NO];
     [result setHasShadow: YES];
-    return (id)result;
+    return result;
 }
 
 - (void)mouseDown:(NSEvent *)theEvent

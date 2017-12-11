@@ -19,10 +19,6 @@
  MA 02111, USA.
  */
 
-//
-// any changes since 0.77 copyright 2005-2012 Maciej Bartosiak
-//
-
 #include <inttypes.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -30,19 +26,97 @@
 #include <stdlib.h>
 #include <string.h>
 
+//#include "arch.h"
+//#include "platform.h"
+#include "macutil.h"
+#include "display.h"
+#include "proc.h"
+//#include "proc_int.h"
 #include "digit_ops.h"
-#include "utils.h"
 #include "proc_woodstock.h"
+//#include "dis_woodstock.h"
+
 
 /* If defined, print warnings about stack overflow or underflow. */
 #undef STACK_WARNING
 
-#define BIT_SET(val,bit_num)    ((val) |= (1 << (bit_num)))
-#define BIT_CLEAR(val,bit_num)  ((val) &= ~(1 << (bit_num)))
-#define BIT_TEST(val,bit_num)   ((val) & (1 << (bit_num)))
+
+#define WR(name, field, bits, radix, get, set, arg) \
+{{ name, bits, 1, radix },                      \
+	OFFSET_OF (act_reg_t, field),                  \
+	SIZE_OF (act_reg_t, field),                    \
+	get, set, arg } 
 
 
-static inline uint8_t get_effective_bank (cpu_t *act_reg, rom_addr_t addr)
+#define WRA(name, field, bits, radix, get, set, arg, array) \
+{{ name, bits, array, radix },                          \
+	OFFSET_OF (act_reg_t, field[0]),                       \
+	SIZE_OF (act_reg_t, field[0]),                         \
+	get, set, arg } 
+
+
+#define WRD(name, field, digits)      \
+{{ name, digits * 4, 1, 16 },     \
+	OFFSET_OF (act_reg_t, field),    \
+	SIZE_OF (act_reg_t, field),      \
+	get_digits, set_digits, digits } 
+
+
+/*static reg_detail_t woodstock_cpu_reg_detail [] =
+{
+	//   name     field  digits
+	WRD ("a",     a,     WSIZE),
+	WRD ("b",     b,     WSIZE),
+	WRD ("c",     c,     WSIZE),
+	WRD ("y",     y,     WSIZE),
+	WRD ("z",     z,     WSIZE),
+	WRD ("t",     t,     WSIZE),
+	WRD ("m1",    m1,    WSIZE),
+	WRD ("m2",    m2,    WSIZE),
+	
+	//   name       field    bits   radix get        set        arg
+	WR  ("p",       p,       4,     16,   NULL,      NULL,      0),
+	WR  ("f",       f,       4,     16,   NULL,      NULL,      0),
+	WR  ("decimal", decimal, 1,      2,   NULL,      NULL,      0),
+	WR  ("carry",   carry,   1,      2,   NULL,      NULL,      0),
+	// prev_carry
+	
+	WR  ("s",        s,        SSIZE,         2, get_bools, set_bools, SSIZE),
+	WR  ("ext_flag", ext_flag, EXT_FLAG_SIZE, 2, get_bools, set_bools, EXT_FLAG_SIZE),
+	
+	WR  ("bank",    bank,    1,     2,   NULL,      NULL,      0),
+	WR  ("pc",      pc,      12,    8,   NULL,      NULL,      0),
+	// prev_pc
+	WRA ("stack",   stack,   12,    8, NULL,      NULL,        0, STACK_SIZE),
+	WR  ("del_rom_flag", del_rom_flag,   1,     2,   NULL,      NULL,      0),
+	WR  ("del_rom", del_rom, 4,     8,   NULL,      NULL,      0),
+	
+	WR  ("display_enable", display_enable,   1,     2,   NULL,      NULL,      0),
+	WR  ("display_14_digit", display_14_digit,   1,     2,   NULL,      NULL,      0),
+	// key_flag
+	// key_buf
+	WR  ("ram_addr", ram_addr, 8, 16, NULL, NULL, 0)
+};*/
+
+
+//static chip_event_fn_t woodstock_event_fn;
+static void woodstock_event_fn (act_reg_t *act_reg, int event);
+static void spice_event_fn (act_reg_t *act_reg, int event);
+
+/*static chip_detail_t woodstock_cpu_chip_detail =
+{
+{
+    "ACT",
+    CHIP_CPU,
+    false  // There can only be one ACT in the calculator.
+},
+sizeof (woodstock_cpu_reg_detail) / sizeof (reg_detail_t),
+woodstock_cpu_reg_detail,
+woodstock_event_fn,
+};*/
+
+
+static inline uint8_t get_effective_bank (act_reg_t *act_reg, rom_addr_t addr)
 {
 	uint8_t page = addr / N_PAGE_SIZE;
 	uint8_t bank;
@@ -55,40 +129,84 @@ static inline uint8_t get_effective_bank (cpu_t *act_reg, rom_addr_t addr)
 }
 
 
-static rom_word_t woodstock_get_ucode (cpu_t *act_reg, rom_addr_t addr)
+static rom_word_t woodstock_get_ucode (act_reg_t *act_reg, rom_addr_t addr)
 {
 	uint8_t bank;
-	//uint16_t index;
 	
 	bank = get_effective_bank (act_reg, addr);
 	
 	// $$$ check for non-existent memory?
-	//index = bank * (MAX_PAGE * N_PAGE_SIZE) + addr;
-	
-	//if (index > (sizeof rom_data / sizeof(rom_data[0]))) {
-	//	printf("index too big: %d\n", index);
-	//}
-	
 	
 	return act_reg->rom [bank * (MAX_PAGE * N_PAGE_SIZE) + addr];
 }
 
-static inline uint8_t arithmetic_base (cpu_t *act_reg)
+
+/*static bool woodstock_read_rom (act_reg_t *act_reg,
+								uint8_t    bank,
+								addr_t     addr,
+								rom_word_t *val)
+{
+	uint8_t page;
+	uint16_t rom_index;
+	
+	if (addr >= (MAX_PAGE * N_PAGE_SIZE))
+		return false;
+	
+	page = addr / N_PAGE_SIZE;
+	
+	if (! (act_reg->bank_exists [page] & (1 << bank)))
+		return false;
+	
+	rom_index = bank * (MAX_PAGE * N_PAGE_SIZE) + addr;
+	
+	if (! act_reg->rom_exists [rom_index])
+		return false;
+	
+	*val = act_reg->rom [rom_index];
+	return true;
+}*/
+
+
+bool woodstock_write_rom (act_reg_t *act_reg,
+								 uint8_t    bank,
+								 addr_t     addr,
+								 rom_word_t *val)
+{
+	uint8_t page;
+	uint16_t rom_index;
+	
+	if (addr >= (MAX_PAGE * N_PAGE_SIZE))
+		return false;
+	
+	page = addr / N_PAGE_SIZE;
+	
+	act_reg->bank_exists [page] |= (1 << bank);
+	
+	rom_index = bank * (MAX_PAGE * N_PAGE_SIZE) + addr;
+	
+	act_reg->rom_exists [rom_index] = true;
+	act_reg->rom [rom_index] = *val;
+	
+	return true;
+}
+
+
+static inline uint8_t arithmetic_base (act_reg_t *act_reg)
 {
 	return act_reg->decimal ? 10 : 16;
 }
 
 
-//static void woodstock_print_state (cpu_t *act_reg);
+static void woodstock_print_state (act_reg_t *act_reg);
 
 
-static void bad_op (cpu_t *act_reg, int opcode)
+static void bad_op (act_reg_t *act_reg, int opcode)
 {	
-	printf ("illegal opcode %04o at %05o\n", opcode, act_reg->pc - 1);
+	printf ("illegal opcode %04o at %05o\n", opcode, act_reg->prev_pc);
 }
 
 
-static void op_arith (cpu_t *act_reg, int opcode)
+static void op_arith (act_reg_t *act_reg, int opcode)
 {
 	uint8_t op, field;
 	int first = 0;
@@ -103,8 +221,8 @@ static void op_arith (cpu_t *act_reg, int opcode)
 			first = act_reg->p; last = act_reg->p;
 			if (act_reg->p >= WSIZE)
 			{
-				printf ("Warning! p >= WSIZE at %05o\n", act_reg->pc - 1);
-				//woodstock_print_state (act_reg);
+				printf ("Warning! p >= WSIZE at %05o\n", act_reg->prev_pc);
+				woodstock_print_state (act_reg);
 				last = 0;  /* don't do anything */
 			}
 				break;
@@ -112,8 +230,8 @@ static void op_arith (cpu_t *act_reg, int opcode)
 			first = 0; last = act_reg->p;
 			if (act_reg->p >= WSIZE)
 			{
-				printf ("Warning! p >= WSIZE at %05o\n", act_reg->pc - 1);
-				//woodstock_print_state (act_reg);
+				printf ("Warning! p >= WSIZE at %05o\n", act_reg->prev_pc);
+				woodstock_print_state (act_reg);
 				last = WSIZE - 1;
 			}
 				break;
@@ -270,7 +388,7 @@ static void op_arith (cpu_t *act_reg, int opcode)
 }
 
 
-static void handle_del_rom (cpu_t *act_reg)
+static void handle_del_rom (act_reg_t *act_reg)
 {
 	if (act_reg->del_rom_flag)
     {
@@ -280,7 +398,7 @@ static void handle_del_rom (cpu_t *act_reg)
 }
 
 
-static void op_goto (cpu_t *act_reg, int opcode)
+static void op_goto (act_reg_t *act_reg, int opcode)
 {	
 	if (! act_reg->prev_carry)
     {
@@ -290,7 +408,7 @@ static void op_goto (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_jsb (cpu_t *act_reg, int opcode)
+static void op_jsb (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->stack [act_reg->sp] = act_reg->pc;
 	act_reg->sp++;
@@ -306,7 +424,7 @@ static void op_jsb (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_return (cpu_t *act_reg, int opcode)
+static void op_return (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->sp--;
 	if (act_reg->sp < 0)
@@ -320,18 +438,18 @@ static void op_return (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_nop (cpu_t *act_reg, int opcode)
+static void op_nop (act_reg_t *act_reg, int opcode)
 {
 }
 
 
-static void op_binary (cpu_t *act_reg, int opcode)
+static void op_binary (act_reg_t *act_reg, int opcode)
 {
 	act_reg->decimal = false;
 }
 
 
-static void op_decimal (cpu_t *act_reg, int opcode)
+static void op_decimal (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->decimal = true;
 }
@@ -340,7 +458,7 @@ static void op_decimal (cpu_t *act_reg, int opcode)
 /* $$$ woodstock doc says when increment or decrement P wraps,
 * P "disappears for one word time". */
 
-static void op_dec_p (cpu_t *act_reg, int opcode)
+static void op_dec_p (act_reg_t *act_reg, int opcode)
 {	
 	if (act_reg->p)
 		act_reg->p--;
@@ -349,7 +467,7 @@ static void op_dec_p (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_inc_p (cpu_t *act_reg, int opcode)
+static void op_inc_p (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->p++;
 	if (act_reg->p >= WSIZE)
@@ -357,48 +475,47 @@ static void op_inc_p (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_clear_s (cpu_t *act_reg, int opcode)
+static void op_clear_s (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
 	for (i = 0; i < SSIZE; i++)
 		if ((i != 1) && (i != 2) && (i != 5) && (i != 15))
-			//act_reg->s [i] = 0;
-            BIT_CLEAR(act_reg->s, i);
+			act_reg->s [i] = 0;
 }
 
 
-static void op_m1_exch_c (cpu_t *act_reg, int opcode)
+static void op_m1_exch_c (act_reg_t *act_reg, int opcode)
 {	
 	reg_exch (act_reg->c, act_reg->m1, 0, WSIZE - 1);
 }
 
 
-static void op_m1_to_c (cpu_t *act_reg, int opcode)
+static void op_m1_to_c (act_reg_t *act_reg, int opcode)
 {	
 	reg_copy (act_reg->c, act_reg->m1, 0, WSIZE - 1);
 }
 
 
-static void op_m2_exch_c (cpu_t *act_reg, int opcode)
+static void op_m2_exch_c (act_reg_t *act_reg, int opcode)
 {	
 	reg_exch (act_reg->c, act_reg->m2, 0, WSIZE - 1);
 }
 
 
-static void op_m2_to_c (cpu_t *act_reg, int opcode)
+static void op_m2_to_c (act_reg_t *act_reg, int opcode)
 {	
 	reg_copy (act_reg->c, act_reg->m2, 0, WSIZE - 1);
 }
 
 
-static void op_f_to_a (cpu_t *act_reg, int opcode)
+static void op_f_to_a (act_reg_t *act_reg, int opcode)
 {
 	act_reg->a [0] = act_reg->f;
 }
 
 
-static void op_f_exch_a (cpu_t *act_reg, int opcode)
+static void op_f_exch_a (act_reg_t *act_reg, int opcode)
 {
 	int t;
 	
@@ -408,7 +525,7 @@ static void op_f_exch_a (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_circulate_a_left (cpu_t *act_reg, int opcode)
+static void op_circulate_a_left (act_reg_t *act_reg, int opcode)
 {
 	int i, t;
 	
@@ -419,13 +536,17 @@ static void op_circulate_a_left (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_bank_switch (cpu_t *act_reg, int opcode)
+static void op_bank_switch (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->bank ^= 1;
+#ifdef DEBUG_BANK_SWITCH
+	printf ("bank switch at %04o, will select bank %o\n",
+			act_reg->prev_pc, act_reg->bank);
+#endif
 }
 
 
-static void op_rom_selftest (cpu_t *act_reg, int opcode)
+static void op_rom_selftest (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->crc = 01777;
 	act_reg->inst_state = selftest;
@@ -434,20 +555,19 @@ static void op_rom_selftest (cpu_t *act_reg, int opcode)
 }
 
 
-static void rom_selftest_done (cpu_t *act_reg)
+static void rom_selftest_done (act_reg_t *act_reg)
 {	
 	// ROM self-test completed, return and set S5 if error
 	printf ("ROM CRC done, crc = %03x: %s\n", act_reg->crc,
 			act_reg->crc == 0x078 ? "good" : "bad");
 	if (act_reg->crc != 0x078)
-		//act_reg->s [5] = 1;  // indicate error
-        BIT_SET(act_reg->s, 5);
+		act_reg->s [5] = 1;  // indicate error
 	act_reg->inst_state = norm;
 	op_return (act_reg, 0);
 }
 
 
-static void crc_update (cpu_t *act_reg, int word)
+static void crc_update (act_reg_t *act_reg, int word)
 {
 	int i;
 	int b;
@@ -463,16 +583,19 @@ static void crc_update (cpu_t *act_reg, int word)
 }
 
 
-static void op_c_to_addr (cpu_t *act_reg, int opcode)
+static void op_c_to_addr (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->ram_addr = (act_reg->c [1] << 4) + act_reg->c [0];
-
+#ifdef HAS_DEBUGGER
+	if (sim->debug_flags & (1 << SIM_DEBUG_RAM_TRACE))
+		printf ("RAM select %02x\n", act_reg->ram_addr);
+#endif
 	if (act_reg->ram_addr >= act_reg->max_ram)
 		printf ("c -> ram addr: address %d out of range\n", act_reg->ram_addr);
 }
 
 
-static void op_c_to_data (cpu_t *act_reg, int opcode)
+static void op_c_to_data (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
@@ -481,12 +604,21 @@ static void op_c_to_data (cpu_t *act_reg, int opcode)
 		printf ("c -> data: address %02x out of range\n", act_reg->ram_addr);
 		return;
     }
+#ifdef HAS_DEBUGGER
+	if (sim->debug_flags & (1 << SIM_DEBUG_RAM_TRACE))
+    {
+		printf ("C -> DATA, addr %02x  data ", act_reg->ram_addr);
+		for (i = 0; i < WSIZE; i++)
+			printf ("%x", act_reg->c [i]);
+		printf ("\n");
+    }
+#endif
 	for (i = 0; i < WSIZE; i++)
 		act_reg->ram [act_reg->ram_addr] [i] = act_reg->c [i];
 }
 
 
-static void op_data_to_c (cpu_t *act_reg, int opcode)
+static void op_data_to_c (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
@@ -497,12 +629,21 @@ static void op_data_to_c (cpu_t *act_reg, int opcode)
 			act_reg->c [i] = 0;
 		return;
     }
+#ifdef HAS_DEBUGGER
+	if (sim->debug_flags & (1 << SIM_DEBUG_RAM_TRACE))
+    {
+		printf ("DATA -> C, addr %02x  data ", act_reg->ram_addr);
+		for (i = 0; i < WSIZE; i++)
+			printf ("%x", act_reg->ram [act_reg->ram_addr] [i]);
+		printf ("\n");
+    }
+#endif /* HAS_DEBUGGER */
 	for (i = 0; i < WSIZE; i++)
 		act_reg->c [i] = act_reg->ram [act_reg->ram_addr] [i];
 }
 
 
-static void op_c_to_register (cpu_t *act_reg, int opcode)
+static void op_c_to_register (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
@@ -514,13 +655,21 @@ static void op_c_to_register (cpu_t *act_reg, int opcode)
 		printf ("c -> register: address %d out of range\n", act_reg->ram_addr);
 		return;
     }
-
+#ifdef HAS_DEBUGGER
+	if (sim->debug_flags & (1 << SIM_DEBUG_RAM_TRACE))
+    {
+		printf ("C -> REGISTER %d, addr %02x  data ", opcode >> 6, act_reg->ram_addr);
+		for (i = 0; i < WSIZE; i++)
+			printf ("%x", act_reg->c [i]);
+		printf ("\n");
+    }
+#endif /* HAS_DEBUGGER */
 	for (i = 0; i < WSIZE; i++)
 		act_reg->ram [act_reg->ram_addr] [i] = act_reg->c [i];
 }
 
 
-static void op_register_to_c (cpu_t *act_reg, int opcode)
+static void op_register_to_c (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
@@ -534,17 +683,29 @@ static void op_register_to_c (cpu_t *act_reg, int opcode)
 			act_reg->c [i] = 0;
 		return;
     }
-
+#ifdef HAS_DEBUGGER
+	if (sim->debug_flags & (1 << SIM_DEBUG_RAM_TRACE))
+    {
+		printf ("REGISTER -> C %d, addr %02x  data ", opcode >> 6, act_reg->ram_addr);
+		for (i = 0; i < WSIZE; i++)
+			printf ("%x", act_reg->ram [act_reg->ram_addr] [i]);
+		printf ("\n");
+    }
+#endif /* HAS_DEBUGGER */
 	for (i = 0; i < WSIZE; i++)
 		act_reg->c [i] = act_reg->ram [act_reg->ram_addr] [i];
 }
 
 
-static void op_clear_data_regs (cpu_t *act_reg, int opcode)
+static void op_clear_data_regs (act_reg_t *act_reg, int opcode)
 {
 	int base;
 	int i, j;
 	
+#ifdef HAS_DEBUGGER
+	if (sim->debug_flags & (1 << SIM_DEBUG_RAM_TRACE))
+		printf ("clear data regs, addr %02x\n", act_reg->ram_addr);
+#endif /* HAS_DEBUGGER */
 	base = act_reg->ram_addr & ~ 017;
 	for (i = base; i <= base + 15; i++)
 		for (j = 0; j < WSIZE; j++)
@@ -552,7 +713,7 @@ static void op_clear_data_regs (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_c_to_stack (cpu_t *act_reg, int opcode)
+static void op_c_to_stack (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
@@ -565,7 +726,7 @@ static void op_c_to_stack (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_stack_to_a (cpu_t *act_reg, int opcode)
+static void op_stack_to_a (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
@@ -578,7 +739,7 @@ static void op_stack_to_a (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_y_to_a (cpu_t *act_reg, int opcode)
+static void op_y_to_a (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
@@ -589,7 +750,7 @@ static void op_y_to_a (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_down_rotate (cpu_t *act_reg, int opcode)
+static void op_down_rotate (act_reg_t *act_reg, int opcode)
 {
 	int i, t;
 	
@@ -604,7 +765,7 @@ static void op_down_rotate (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_clear_reg (cpu_t *act_reg, int opcode)
+static void op_clear_reg (act_reg_t *act_reg, int opcode)
 {
 	int i;
 	
@@ -617,10 +778,13 @@ static void op_clear_reg (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_load_constant (cpu_t *act_reg, int opcode)
+static void op_load_constant (act_reg_t *act_reg, int opcode)
 {	
 	if (act_reg->p >= WSIZE)
-		printf ("load constant w/ p >= WSIZE at %05o\n", act_reg->pc - 1);
+    {
+		printf ("load constant w/ p >= WSIZE at %05o\n", act_reg->prev_pc);
+		woodstock_print_state (act_reg);
+    }
 	else
 		act_reg->c [act_reg->p] = opcode >> 6;
 	if (act_reg->p)
@@ -630,35 +794,35 @@ static void op_load_constant (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_set_s (cpu_t *act_reg, int opcode)
+static void op_set_s (act_reg_t *act_reg, int opcode)
 {	
 	if ((opcode >> 6) >= SSIZE)
-		printf ("stat >= SSIZE at %05o\n", act_reg->pc - 1);
+		printf ("stat >= SSIZE at %05o\n", act_reg->prev_pc);
 	else
-        BIT_SET(act_reg->s, (opcode >> 6));
+		act_reg->s [opcode >> 6] = 1;
 }
 
 
-static void op_clr_s (cpu_t *act_reg, int opcode)
+static void op_clr_s (act_reg_t *act_reg, int opcode)
 {	
 	if ((opcode >> 6) >= SSIZE)
-		printf ("stat >= SSIZE at %05o\n", act_reg->pc - 1);
+		printf ("stat >= SSIZE at %05o\n", act_reg->prev_pc);
 	else
-        BIT_CLEAR(act_reg->s, (opcode >> 6));
+		act_reg->s [opcode >> 6] = 0;
 }
 
 
-static void op_test_s_eq_0 (cpu_t *act_reg, int opcode)
+static void op_test_s_eq_0 (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->inst_state = branch;
-    act_reg->carry = BIT_TEST(act_reg->s, (opcode >> 6));
+	act_reg->carry = act_reg->s [opcode >> 6];
 }
 
 
-static void op_test_s_eq_1 (cpu_t *act_reg, int opcode)
+static void op_test_s_eq_1 (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->inst_state = branch;
-	act_reg->carry = ! BIT_TEST(act_reg->s, (opcode >> 6));
+	act_reg->carry = ! act_reg->s [opcode >> 6];
 }
 
 
@@ -669,7 +833,7 @@ static uint8_t p_test_map [16] =
 {  4,  8, 12,  2,  9,  1,  6,  3,  1, 13,  5,  0, 11, 10,  7,  4 };
 
 
-static void op_set_p (cpu_t *act_reg, int opcode)
+static void op_set_p (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->p = p_set_map [opcode >> 6];
 	if (act_reg->p >= WSIZE)
@@ -677,34 +841,34 @@ static void op_set_p (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_test_p_eq (cpu_t *act_reg, int opcode)
+static void op_test_p_eq (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->inst_state = branch;
 	act_reg->carry = ! (act_reg->p == p_test_map [opcode >> 6]);
 }
 
 
-static void op_test_p_ne (cpu_t *act_reg, int opcode)
+static void op_test_p_ne (act_reg_t *act_reg, int opcode)
 {
 	act_reg->inst_state = branch;
 	act_reg->carry = ! (act_reg->p != p_test_map [opcode >> 6]);
 }
 
 
-static void op_sel_rom (cpu_t *act_reg, int opcode)
+static void op_sel_rom (act_reg_t *act_reg, int opcode)
 {
 	act_reg->pc = ((opcode & 01700) << 2) + (act_reg->pc & 0377);
 }
 
 
-static void op_del_sel_rom (cpu_t *act_reg, int opcode)
+static void op_del_sel_rom (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->del_rom = opcode >> 6;
 	act_reg->del_rom_flag = 1;
 }
 
 
-static void op_keys_to_rom_addr (cpu_t *act_reg, int opcode)
+static void op_keys_to_rom_addr (act_reg_t *act_reg, int opcode)
 {
 	act_reg->pc = act_reg->pc & ~0377;
 	handle_del_rom (act_reg);
@@ -717,7 +881,7 @@ static void op_keys_to_rom_addr (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_keys_to_a (cpu_t *act_reg, int opcode)
+static void op_keys_to_a (act_reg_t *act_reg, int opcode)
 {	
 	if (act_reg->key_buf < 0)
     {
@@ -731,7 +895,7 @@ static void op_keys_to_a (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_a_to_rom_addr (cpu_t *act_reg, int opcode)
+static void op_a_to_rom_addr (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->pc = act_reg->pc & ~0377;
 	handle_del_rom (act_reg);
@@ -739,27 +903,26 @@ static void op_a_to_rom_addr (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_display_off (cpu_t *act_reg, int opcode)
+static void op_display_off (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->display_enable = 0;
 }
 
 
-static void op_display_toggle (cpu_t *act_reg, int opcode)
+static void op_display_toggle (act_reg_t *act_reg, int opcode)
 {	
 	act_reg->display_enable = ! act_reg->display_enable;
 }
 
 
-static void op_display_reset_twf (cpu_t *act_reg, int opcode)
-{
-    // is this correct?
-	//act_reg->display_14_digit = true;
-	//act_reg->right_scan = 0;
+static void op_display_reset_twf (act_reg_t *act_reg, int opcode)
+{	
+	act_reg->display_14_digit = true;
+	act_reg->right_scan = 0;
 }
 
 
-static void op_crc_clear_f1 (cpu_t *act_reg, int opcode)
+static void op_crc_clear_f1 (act_reg_t *act_reg, int opcode)
 {
 	// don't do anything, as CRC F1 is controlled by hardware
 	// (in our case, ext_flag [1])
@@ -767,32 +930,32 @@ static void op_crc_clear_f1 (cpu_t *act_reg, int opcode)
 }
 
 
-static void op_crc_test_f1 (cpu_t *act_reg, int opcode)
-{
-    if (BIT_TEST(act_reg->ext_flag, 1))
-        BIT_SET(act_reg->s, 3);
+static void op_crc_test_f1 (act_reg_t *act_reg, int opcode)
+{	
+	if (act_reg->ext_flag [1])
+		act_reg->s [3] = 1;
 }
 
 
-static void init_ops (cpu_t *act_reg)
+static void init_ops (act_reg_t *act_reg)
 {
 	int i;
 	
 	for (i = 0; i < 1024; i += 4)
     {
 		act_reg->op_fcn [i + 0] = bad_op;
-		act_reg->op_fcn [i + 1] = op_jsb;    // type 1: aaaaaaaa01
-		act_reg->op_fcn [i + 2] = op_arith;  // type 2: ooooowww10
-		act_reg->op_fcn [i + 3] = op_goto;   // type 1: aaaaaaaa11
+		act_reg->op_fcn [i + 1] = op_jsb;    /* type 1: aaaaaaaa01 */
+		act_reg->op_fcn [i + 2] = op_arith;  /* type 2: ooooowww10 */
+		act_reg->op_fcn [i + 3] = op_goto;   /* type 1: aaaaaaaa11 */
     }
 	
 	for (i = 0; i <= 15; i ++)
     {
-		// xx00 uassigned
+		/* xx00 uassigned */
 		act_reg->op_fcn [00004 + (i << 6)] = op_set_s;
-		// xx10 misc
+		/* xx10 misc */
 		act_reg->op_fcn [00014 + (i << 6)] = op_clr_s;
-		// xx20 misc
+		/* xx20 misc */
 		act_reg->op_fcn [00024 + (i << 6)] = op_test_s_eq_1;
 		act_reg->op_fcn [00030 + (i << 6)] = op_load_constant;
 		act_reg->op_fcn [00034 + (i << 6)] = op_test_s_eq_0;
@@ -800,7 +963,7 @@ static void init_ops (cpu_t *act_reg)
 		act_reg->op_fcn [00044 + (i << 6)] = op_test_p_eq;
 		act_reg->op_fcn [00050 + (i << 6)] = op_c_to_register;
 		act_reg->op_fcn [00054 + (i << 6)] = op_test_p_ne;
-		// xx60 misc
+		/* xx60 misc */
 		act_reg->op_fcn [00064 + (i << 6)] = op_del_sel_rom;
 		act_reg->op_fcn [00070 + (i << 6)] = op_register_to_c;
 		act_reg->op_fcn [00074 + (i << 6)] = op_set_p;
@@ -822,7 +985,7 @@ static void init_ops (cpu_t *act_reg)
 	act_reg->op_fcn [01210] = op_y_to_a;
 	act_reg->op_fcn [01310] = op_c_to_stack;
 	act_reg->op_fcn [01410] = op_decimal;
-	// 1510 unassigned
+	/* 1510 unassigned */
 	act_reg->op_fcn [01610] = op_f_to_a;
 	act_reg->op_fcn [01710] = op_f_exch_a;
 	
@@ -835,19 +998,19 @@ static void init_ops (cpu_t *act_reg)
 	act_reg->op_fcn [00620] = op_dec_p;
 	act_reg->op_fcn [00720] = op_inc_p;
 	act_reg->op_fcn [01020] = op_return;
-	// 1120..1720 unknown, probably printer
+	/* 1120..1720 unknown, probably printer */
 	
-	// 0060 unknown
-	// 0160..0760 unassigned/unknown
+	/* 0060 unknown */
+	/* 0160..0760 unassigned/unknown */
 	act_reg->op_fcn [01060] = op_bank_switch;
 	act_reg->op_fcn [01160] = op_c_to_addr;
 	act_reg->op_fcn [01260] = op_clear_data_regs;
 	act_reg->op_fcn [01360] = op_c_to_data;
-	act_reg->op_fcn [01460] = op_rom_selftest;  // Only on Spice series
-	// 1560..1660 unassigned/unknown
-	act_reg->op_fcn [01760] = op_nop;  // "HI I'M WOODSTOCK"
+	act_reg->op_fcn [01460] = op_rom_selftest;  /* Only on Spice series */
+	/* 1560..1660 unassigned/unknown */
+	act_reg->op_fcn [01760] = op_nop;  /* "HI I'M WOODSTOCK" */
 	
-	// CRC chip in 67/97
+	/* CRC chip in 67/97 */
 	act_reg->op_fcn [00300] = op_crc_test_f1;
 	act_reg->op_fcn [01500] = op_crc_clear_f1;
 	
@@ -857,34 +1020,207 @@ static void init_ops (cpu_t *act_reg)
 	act_reg->op_fcn [01000] = op_nop;
 	act_reg->op_fcn [01300] = op_nop;
 	
-	//
-	// Instruction codings unknown (probably 1160..1760):
-	//    PRINT 0
-	//    PRINT 1
-	//    PRINT 2
-	//    PRINT 3
-	//    PRINT 6
-	//    HOME?
-	//    CR?
-	//
+	/*
+	 * Instruction codings unknown (probably 1160..1760):
+	 *    PRINT 0
+	 *    PRINT 1
+	 *    PRINT 2
+	 *    PRINT 3
+	 *    PRINT 6
+	 *    HOME?
+	 *    CR?
+	 */
 }
 
 
-static bool woodstock_execute_cycle (cpu_t *act_reg)
+/*static void woodstock_disassemble (act_reg_t *act_reg, int addr, char *buf, int len)
+{	
+	rom_word_t op1, op2;
+	
+	if (act_reg->inst_state == branch)  // second word of conditional branch
+    {
+		snprintf (buf, len, "...");
+		return;
+    }
+	
+	op1 = woodstock_get_ucode (act_reg, addr);
+	op2 = woodstock_get_ucode (act_reg, addr + 1);
+	
+	woodstock_disassemble_inst (addr, op1, op2, buf, len);
+}*/
+
+
+static void display_scan_advance (act_reg_t *act_reg)
+{	
+	if ((--act_reg->display_scan_position) < act_reg->right_scan)
+    {
+		while (act_reg->display_digit_position < MAX_DIGIT_POSITION)
+			act_reg->display_segments [act_reg->display_digit_position++] = 0;
+		
+		////sim_send_display_update_to_gui (sim);
+		
+		//int i;
+		//for (i=0; i<MAX_DIGIT_POSITION; i++)
+		//{
+		//	printf("%d ", act_reg->display_segments [i]);
+		//}
+		//printf("\n");
+		
+		//act_reg->need_redraw = true;
+		display_callback(act_reg);
+		
+		act_reg->display_digit_position = 0;
+		act_reg->display_scan_position = act_reg->left_scan;
+    }
+}
+
+
+static void woodstock_display_scan (act_reg_t *act_reg)
+{	
+	int a = act_reg->a [act_reg->display_scan_position];
+	int b = act_reg->b [act_reg->display_scan_position];
+	segment_bitmap_t segs = 0;
+	
+	if (act_reg->display_14_digit && (act_reg->display_digit_position == 0))
+    {
+		// save room for mantissa sign
+		act_reg->display_segments [act_reg->display_digit_position++] = 0;
+    }
+	
+	if (act_reg->display_enable)
+    {
+		if (b & 2)
+		{
+			if ((a >= 2) && ((a & 7) != 7))
+				segs = act_reg->char_gen ['-'];
+		}
+		else
+			segs = act_reg->char_gen [a];
+		if (act_reg->display_14_digit && (act_reg->display_digit_position == 12))
+		{
+			// mantissa sign comes from E segment of exponent sign digit
+			if (segs & (1 << 4))
+				act_reg->display_segments [0] = act_reg->char_gen ['-'];  
+			// exponent sign digit only has G segment
+			segs &= act_reg->char_gen ['-'];
+		}
+		if (b & 1)
+			segs |= act_reg->char_gen ['.'];
+    }
+	
+	act_reg->display_segments [act_reg->display_digit_position++] = segs;
+	
+	display_scan_advance (act_reg);
+}
+
+
+static void spice_display_scan (act_reg_t *act_reg)
+{	
+	int a = act_reg->a [act_reg->display_scan_position];
+	int b = act_reg->b [act_reg->display_scan_position];
+	segment_bitmap_t segs = 0;
+	
+	if (! act_reg->display_digit_position)
+		act_reg->display_segments [act_reg->display_digit_position++] = 0;  /* make room for sign */
+	
+	if (act_reg->display_enable)
+    {
+		if ((act_reg->display_scan_position == act_reg->left_scan) && (b & 4))
+			act_reg->display_segments [0] = act_reg->char_gen ['-'];
+		if (b == 6)
+		{
+			if (a == 9)
+				segs = act_reg->char_gen ['-'];
+		}
+		else
+			segs = act_reg->char_gen [a];
+		if (b & 1)
+			segs |= act_reg->char_gen [(b & 2) ? ',' : '.'];
+    }
+	
+	act_reg->display_segments [act_reg->display_digit_position++] = segs;
+	
+	display_scan_advance (act_reg);
+}
+
+
+static void print_reg (char *label, reg_t reg)
+{
+	int i;
+	printf ("%s", label);
+	for (i = WSIZE - 1; i >= 0; i--)
+		printf ("%x", reg [i]);
+	printf ("\n");
+}
+
+static void woodstock_print_state (act_reg_t *act_reg)
+{
+	int i;
+	uint8_t bank;
+	int mapped_addr;
+	
+	bank = get_effective_bank (act_reg, act_reg->prev_pc);
+	mapped_addr = bank * (MAX_PAGE * N_PAGE_SIZE) + act_reg->prev_pc;
+	
+	printf ("pc=%05o  radix=%d  p=%d  f=%x  stat:",
+			mapped_addr, arithmetic_base (act_reg), act_reg->p, act_reg->f);
+	for (i = 0; i < 16; i++)
+		if (act_reg->s [i])
+			printf (" %d", i);
+	printf ("\n");
+	print_reg ("a:  ", act_reg->a);
+	print_reg ("b:  ", act_reg->b);
+	print_reg ("c:  ", act_reg->c);
+	print_reg ("m1: ", act_reg->m1);
+	print_reg ("m2: ", act_reg->m2);
+	
+	/*if (sim->source [mapped_addr])
+		printf ("%s\n", sim->source [mapped_addr]);
+	else
+    {
+		char buf [80];
+		printf ("%" PRId64 ": ", sim->cycle_count);
+		woodstock_disassemble (act_reg, act_reg->prev_pc, buf, sizeof (buf));
+		printf ("%s\n", buf);
+    }*/
+}
+
+bool woodstock_execute_cycle (act_reg_t *act_reg)
 {
 	rom_word_t opcode;
 	inst_state_t prev_inst_state;
 	
-	//act_reg->prev_pc = act_reg->pc;
+	act_reg->prev_pc = act_reg->pc;
 	opcode = woodstock_get_ucode (act_reg, act_reg->pc);
 	
 	if (/*(sim->platform != PLATFORM_SPICE) &&*/
 		(act_reg->pc < 02000) &&
 		(act_reg->bank == 1))
 	{
+#ifdef DEBUG_BANK_SWITCH
+		printf ("implicit bank switch at %04o, will select bank 0\n",
+				act_reg->pc);
+#endif
 		act_reg->bank = 0;
 	}
-		
+	
+#ifdef HAS_DEBUGGER
+	if ((sim->debug_flags & (1 << SIM_DEBUG_KEY_TRACE)) &&
+		(act_reg->inst_state == norm))
+    {
+		if (opcode == 00020)
+			sim->debug_flags |= (1 << SIM_DEBUG_TRACE);
+		else if (opcode == 01724)
+			sim->debug_flags &= ~ (1 << SIM_DEBUG_TRACE);
+    }
+	
+	if ((sim->debug_flags & (1 << SIM_DEBUG_TRACE)) &&
+		(act_reg->inst_state != selftest))
+    {
+		woodstock_print_state (sim);
+    }
+#endif /* HAS_DEBUGGER */
+	
 	prev_inst_state = act_reg->inst_state;
 	if (act_reg->inst_state == branch)
 		act_reg->inst_state = norm;
@@ -893,12 +1229,12 @@ static bool woodstock_execute_cycle (cpu_t *act_reg)
 	act_reg->carry = 0;
 	
 	if (act_reg->key_flag)
-        BIT_SET(act_reg->s, 15);
-	    
-    if (BIT_TEST(act_reg->ext_flag, 3))
-        BIT_SET(act_reg->s, 3);
-    if (BIT_TEST(act_reg->ext_flag, 5))
-        BIT_SET(act_reg->s, 5);
+		act_reg->s [15] = 1;
+	
+	if (act_reg->ext_flag [3])
+		act_reg->s [3] = 1;
+	if (act_reg->ext_flag [5])
+		act_reg->s [5] = 1;
 	
 	act_reg->pc++;
 	
@@ -920,11 +1256,15 @@ static bool woodstock_execute_cycle (cpu_t *act_reg)
 					break;
     }
 	
+	act_reg->cycle_count++;
+	
+	act_reg->display_scan_fn (act_reg);
+	
 	return (true);  /* never sleeps */
 }
 
 
-bool woodstock_execute_instruction (cpu_t *act_reg)
+bool woodstock_execute_instruction (act_reg_t *act_reg)
 {
 	do
     {
@@ -935,13 +1275,30 @@ bool woodstock_execute_instruction (cpu_t *act_reg)
 	return true;
 }
 
-static bool spice_execute_cycle (cpu_t *act_reg)
+static bool spice_execute_cycle (act_reg_t *act_reg)
 {
 	rom_word_t opcode;
 	inst_state_t prev_inst_state;
 	
-	//act_reg->prev_pc = act_reg->pc;
+	act_reg->prev_pc = act_reg->pc;
 	opcode = woodstock_get_ucode (act_reg, act_reg->pc);
+		
+#ifdef HAS_DEBUGGER
+	if ((sim->debug_flags & (1 << SIM_DEBUG_KEY_TRACE)) &&
+		(act_reg->inst_state == norm))
+    {
+		if (opcode == 00020)
+			sim->debug_flags |= (1 << SIM_DEBUG_TRACE);
+		else if (opcode == 01724)
+			sim->debug_flags &= ~ (1 << SIM_DEBUG_TRACE);
+    }
+	
+	if ((sim->debug_flags & (1 << SIM_DEBUG_TRACE)) &&
+		(act_reg->inst_state != selftest))
+    {
+		woodstock_print_state (sim);
+    }
+#endif /* HAS_DEBUGGER */
 	
 	prev_inst_state = act_reg->inst_state;
 	if (act_reg->inst_state == branch)
@@ -951,12 +1308,12 @@ static bool spice_execute_cycle (cpu_t *act_reg)
 	act_reg->carry = 0;
 	
 	if (act_reg->key_flag)
-        BIT_SET(act_reg->s, 15);
-	    
-    if (BIT_TEST(act_reg->ext_flag, 3))
-        BIT_SET(act_reg->s, 3);
-    if (BIT_TEST(act_reg->ext_flag, 5))
-        BIT_SET(act_reg->s, 5);
+		act_reg->s [15] = 1;
+	
+	if (act_reg->ext_flag [3])
+		act_reg->s [3] = 1;
+	if (act_reg->ext_flag [5])
+		act_reg->s [5] = 1;
 	
 	act_reg->pc++;
 	
@@ -978,10 +1335,14 @@ static bool spice_execute_cycle (cpu_t *act_reg)
 					break;
     }
 	
+	act_reg->cycle_count++;
+	
+	act_reg->display_scan_fn (act_reg);
+	
 	return (true);  /* never sleeps */
 }
 
-bool spice_execute_instruction (cpu_t *act_reg)
+bool spice_execute_instruction (act_reg_t *act_reg)
 {
 	do
     {
@@ -991,141 +1352,6 @@ bool spice_execute_instruction (cpu_t *act_reg)
 	while (act_reg->inst_state != norm);
 	return true;
 }
-
-
-void woodstock_press_key (cpu_t *act_reg, int keycode)
-{
-	act_reg->key_buf = keycode;
-	act_reg->key_flag = true;
-}
-
-
-void woodstock_release_key (cpu_t *act_reg)
-{
-	act_reg->key_flag = false;
-}
-
-
-void woodstock_set_ext_flag (cpu_t *act_reg, int flag, bool state)
-{	
-	//act_reg->ext_flag [flag] = state;
-    if (state) {
-        BIT_SET(act_reg->ext_flag, flag);
-    } else {
-        BIT_CLEAR(act_reg->ext_flag, flag);
-    }
-}
-
-bool woodstock_get_ext_flag (cpu_t *act_reg, int flag)
-{
-    return BIT_TEST(act_reg->ext_flag,flag);
-}
-
-void woodstock_reset (cpu_t *act_reg)
-{		
-	act_reg->decimal = true;
-	
-	act_reg->pc = 0;
-	act_reg->del_rom_flag = 0;
-	
-	act_reg->inst_state = norm;
-	
-	act_reg->sp = 0;
-	
-	op_clear_reg (act_reg, 0);
-	op_clear_s (act_reg, 0);
-	act_reg->p = 0;
-	
-	act_reg->display_enable = 0;
-	
-	act_reg->key_buf = -1;  // no key has been pressed
-	act_reg->key_flag = 0;
-	
-    BIT_SET(act_reg->ext_flag, 5);
-}
-
-void spice_reset (cpu_t *act_reg)
-{		
-	act_reg->decimal = true;
-	
-	act_reg->pc = 0;
-	act_reg->del_rom_flag = 0;
-	
-	act_reg->inst_state = norm;
-	
-	act_reg->sp = 0;
-	
-	op_clear_reg (act_reg, 0);
-	op_clear_s (act_reg, 0);
-	act_reg->p = 0;
-	
-	act_reg->display_enable = 0;
-	
-	act_reg->key_buf = -1;  // no key has been pressed
-	act_reg->key_flag = 0;
-}
-
-void woodstock_clear_memory (cpu_t *act_reg)
-{
-	int addr;
-	
-	for (addr = 0; addr < act_reg->max_ram; addr++)
-		reg_zero ((digit_t *)act_reg->ram [addr], 0, WSIZE - 1);
-}
-
-static void woodstock_new_rom_addr_space (cpu_t *act_reg,
-										  int max_bank,
-										  int max_page,
-										  int page_size)
-{
-	size_t max_words;
-	
-	max_words = max_bank * max_page * page_size;
-	
-	act_reg->rom = alloc (max_words * sizeof (rom_word_t));
-}
-
-static void woodstock_new_ram_addr_space (cpu_t *act_reg, int max_ram)
-{
-	act_reg->max_ram = max_ram;
-	act_reg->ram = alloc (max_ram * sizeof (reg_t));
-}
-
-
-cpu_t *woodstock_new_processor (int ram_size)
-{
-	cpu_t *act_reg;
-	
-	act_reg = alloc (sizeof (cpu_t));
-	
-    woodstock_new_rom_addr_space (act_reg, MAX_BANK, MAX_PAGE, N_PAGE_SIZE);
-	woodstock_new_ram_addr_space (act_reg, ram_size);
-	
-	init_ops (act_reg);
-    woodstock_reset (act_reg);
-	
-	return act_reg;
-}
-
-cpu_t *spice_new_processor (int ram_size)
-{	
-	cpu_t *act_reg;
-	
-	act_reg = malloc (sizeof (cpu_t));
-	memset(act_reg,0,sizeof (cpu_t));
-	
-    woodstock_new_rom_addr_space (act_reg, MAX_BANK, MAX_PAGE, N_PAGE_SIZE);
-	woodstock_new_ram_addr_space (act_reg, ram_size);
-    
-    init_ops (act_reg);
-	spice_reset (act_reg);
-	
-	return act_reg;
-}
-
-//
-// Read ROM
-//
 
 static bool parse_octal (char *oct, int digits, int *val)
 {
@@ -1140,8 +1366,9 @@ static bool parse_octal (char *oct, int digits, int *val)
 	return (true);
 }
 
-static bool woodstock_parse_object_line (char *buf, int *bank, int *addr,
-                                  rom_word_t *opcode)
+
+bool woodstock_parse_object_line (char *buf, int *bank, int *addr,
+										 rom_word_t *opcode)
 {
 	bool has_bank;
 	int b = 0;
@@ -1149,78 +1376,382 @@ static bool woodstock_parse_object_line (char *buf, int *bank, int *addr,
 	
 	if (buf [0] == '#')  /* comment? */
 		return (false);
-    
-    if ((strlen (buf) < 9) || (strlen (buf) > 10))
+		
+		if ((strlen (buf) < 9) || (strlen (buf) > 10))
 		return (false);
-    
-    if (buf [4] == ':')
+		
+		if (buf [4] == ':')
 		has_bank = false;
-    else if (buf [5] == ':')
+		else if (buf [5] == ':')
 		has_bank = true;
-    else
-    {
-        fprintf (stderr, "invalid object file format\n");
-        return (false);
-    }
-    
-    if (has_bank && ! parse_octal (& buf [0], 1, & b))
-    {
-        fprintf (stderr, "invalid bank in object line '%s'\n", buf);
-        return (false);
-    }
-    
-    if (! parse_octal (& buf [has_bank ? 1 : 0], 4, & a))
-    {
-        fprintf (stderr, "invalid address in object line '%s'\n", buf);
-        return (false);
-    }
-    
-    if (! parse_octal (& buf [has_bank ? 6 : 5], 4, & o))
-    {
-        fprintf (stderr, "invalid opcode in object line '%s'\n", buf);
-        return (false);
-    }
-    
-    *bank = b;
-    *addr = a;
-    *opcode = o;
-    return (true);
+		else
+		{
+			fprintf (stderr, "invalid object file format\n");
+			return (false);
+		}
+		
+		if (has_bank && ! parse_octal (& buf [0], 1, & b))
+		{
+			fprintf (stderr, "invalid bank in object line '%s'\n", buf);
+			return (false);
+		}
+		
+		if (! parse_octal (& buf [has_bank ? 1 : 0], 4, & a))
+		{
+			fprintf (stderr, "invalid address in object line '%s'\n", buf);
+			return (false);
+		}
+		
+		if (! parse_octal (& buf [has_bank ? 6 : 5], 4, & o))
+		{
+			fprintf (stderr, "invalid opcode in object line '%s'\n", buf);
+			return (false);
+		}
+		
+		*bank = b;
+		*addr = a;
+		*opcode = o;
+		return (true);
 }
 
-static bool woodstock_write_rom (cpu_t *act_reg,
-                          uint8_t    bank,
-                          addr_t     addr,
-                          rom_word_t *val)
+
+/*static bool woodstock_parse_listing_line (char *buf, int *bank, int *addr,
+										  rom_word_t *opcode)
 {
-	uint8_t page;
-	uint16_t rom_index;
+	int a, o;
 	
-	if (addr >= (MAX_PAGE * N_PAGE_SIZE))
+	if (strlen (buf) < 18)
+		return (false);
+	
+	if (! parse_octal (& buf [15], 4, & a))
+    {
+		fprintf (stderr, "invalid address %o\n", a);
+		return (false);
+    }
+	
+	if (! parse_octal (& buf [ 9], 4, & o))
+    {
+		fprintf (stderr, "invalid opcode %o\n", o);
+		return (false);
+    }
+	
+	*bank = 0;
+	*addr = a;
+	*opcode = o;
+	return (true);
+}*/
+
+
+void woodstock_press_key (act_reg_t *act_reg, int keycode)
+{
+	act_reg->key_buf = keycode;
+	act_reg->key_flag = true;
+}
+
+
+void woodstock_release_key (act_reg_t *act_reg)
+{
+	act_reg->key_flag = false;
+}
+
+
+void woodstock_set_ext_flag (act_reg_t *act_reg, int flag, bool state)
+{	
+	act_reg->ext_flag [flag] = state;
+}
+
+
+static bool woodstock_read_ram (act_reg_t *act_reg, int addr, uint64_t *val)
+{
+	uint64_t data = 0;
+	int i;
+	bool status;
+	
+	if (addr >= act_reg->max_ram)
+    {
+		status = false;
+		// warning ("woodstock_read_ram: address %d out of range\n", addr);
+    }
+	else
+    {
+		// pack act_reg->ram [addr] into data
+		for (i = WSIZE - 1; i >= 0; i--)
+		{
+			data <<= 4;
+			data += act_reg->ram [addr] [i];
+		}
+		status = true;
+    }
+	
+	*val = data;
+	
+	return status;
+}
+
+
+static bool woodstock_write_ram (act_reg_t *act_reg, int addr, uint64_t *val)
+{
+	uint64_t data;
+	int i;
+	
+	if (addr >= act_reg->max_ram)
+    {
+		//warning ("woodstock_write_ram: address %d out of range\n", addr);
+		fprintf(stderr, "warning: woodstock_write_ram: address %d out of range\n", addr);
 		return false;
+    }
 	
-	page = addr / N_PAGE_SIZE;
+	data = *val;
 	
-	act_reg->bank_exists [page] |= (1 << bank);
-	
-	rom_index = bank * (MAX_PAGE * N_PAGE_SIZE) + addr;
-	
-	//act_reg->rom_exists [rom_index] = true;
-	act_reg->rom [rom_index] = *val;
+	// now unpack data into act_reg->ram [addr]
+	for (i = 0; i <= WSIZE; i++)
+    {
+		act_reg->ram [addr] [i] = data & 0x0f;
+		data >>= 4;
+    }
 	
 	return true;
 }
 
-bool woodstock_read_object_file (cpu_t *act_reg, const char *fn)
+static void woodstock_reset (act_reg_t *act_reg)
+{	
+	act_reg->cycle_count = 0;
+	
+	act_reg->decimal = true;
+	
+	act_reg->pc = 0;
+	act_reg->del_rom_flag = 0;
+	
+	act_reg->inst_state = norm;
+	
+	act_reg->sp = 0;
+	
+	op_clear_reg (act_reg, 0);
+	op_clear_s (act_reg, 0);
+	act_reg->p = 0;
+	
+	act_reg->display_enable = 0;
+	act_reg->display_digit_position = 0;
+	act_reg->display_scan_position = WSIZE - 1;
+	
+	act_reg->key_buf = -1;  // no key has been pressed
+	act_reg->key_flag = 0;
+	
+//	if (sim->platform == PLATFORM_WOODSTOCK)  // but not PLATFORM_TOPCAT
+		act_reg->ext_flag [5] = 1;  // force battery ok
+}
+
+static void spice_reset (act_reg_t *act_reg)
+{	
+	act_reg->cycle_count = 0;
+	
+	act_reg->decimal = true;
+	
+	act_reg->pc = 0;
+	act_reg->del_rom_flag = 0;
+	
+	act_reg->inst_state = norm;
+	
+	act_reg->sp = 0;
+	
+	op_clear_reg (act_reg, 0);
+	op_clear_s (act_reg, 0);
+	act_reg->p = 0;
+	
+	act_reg->display_enable = 0;
+	act_reg->display_digit_position = 0;
+	act_reg->display_scan_position = WSIZE - 1;
+	
+	act_reg->key_buf = -1;  // no key has been pressed
+	act_reg->key_flag = 0;
+	
+	//	if (sim->platform == PLATFORM_WOODSTOCK)  // but not PLATFORM_TOPCAT
+	//act_reg->ext_flag [5] = 1;  // force battery ok
+}
+
+static void woodstock_clear_memory (act_reg_t *act_reg)
+{
+	int addr;
+	
+	for (addr = 0; addr < act_reg->max_ram; addr++)
+		reg_zero ((digit_t *)act_reg->ram [addr], 0, WSIZE - 1);
+}
+
+
+static void woodstock_new_rom_addr_space (act_reg_t *act_reg,
+										  int max_bank,
+										  int max_page,
+										  int page_size)
+{
+	size_t max_words;
+	
+	max_words = max_bank * max_page * page_size;
+	
+	act_reg->rom = alloc (max_words * sizeof (rom_word_t));
+	act_reg->rom_exists = alloc (max_words * sizeof (bool));
+	act_reg->rom_breakpoint = alloc (max_words * sizeof (bool));
+}
+
+
+static void woodstock_new_ram_addr_space (act_reg_t *act_reg, int max_ram)
+{
+	act_reg->max_ram = max_ram;
+	act_reg->ram = alloc (max_ram * sizeof (reg_t));
+}
+
+
+act_reg_t *woodstock_new_processor (int ram_size, void *display)
+{
+	static segment_bitmap_t char_gen[] =
+		{  63,   6,  91,  79, 102, 109, 125,   7, 127, 111,  80, 118,  92, 115, 121,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 384,  64, 128,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+	act_reg_t *act_reg;
+	
+	act_reg = alloc (sizeof (act_reg_t));
+	
+	//install_chip (sim, & woodstock_cpu_chip_detail, act_reg);
+	
+	woodstock_new_rom_addr_space (act_reg, MAX_BANK, MAX_PAGE, N_PAGE_SIZE);
+	woodstock_new_ram_addr_space (act_reg, ram_size);
+	
+/*	switch (sim->platform)
+    {
+		case PLATFORM_WOODSTOCK:
+		case PLATFORM_TOPCAT:*/
+			// default to twelve digits, but RESET TWF instruction switches to
+			// fourteen digits plus special case for sign
+			act_reg->display_digits = 12; // MAX_DIGIT_POSITION; // Woodstock calcs use 12 digit
+			act_reg->display_scan_fn = woodstock_display_scan;
+			act_reg->left_scan = WSIZE - 1;
+			act_reg->right_scan = 2;
+/*			break;
+		case PLATFORM_SPICE:
+			// ten digits plus special-case for sign
+			act_reg->display_digits = MAX_DIGIT_POSITION;
+			act_reg->display_scan_fn = spice_display_scan;
+			act_reg->left_scan = WSIZE - 2;
+			act_reg->right_scan = 3;
+			break;
+		default:
+			fatal (2, "Woodstock arch doesn't know how to handle display for platform %s\n", platform_name [sim->platform]);
+    }*/
+	
+	act_reg->display_scan_position = act_reg->left_scan;
+	act_reg->display_digit_position = 0;
+	
+	act_reg->char_gen = char_gen;
+	
+	init_ops (act_reg);
+	
+	act_reg->display = display;
+	//chip_event (sim, event_reset, NULL, 0, NULL);
+	woodstock_event_fn (act_reg, event_reset);
+	
+	return act_reg;
+}
+
+act_reg_t *spice_new_processor (int ram_size, void *display)
+{
+	static segment_bitmap_t char_gen[] = 
+		{  63,   6,  91,  79, 102, 109, 125,   7, 127, 111,  80, 118,  92, 115, 121,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, 384,  64, 128,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
+			0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0 };
+	
+	act_reg_t *act_reg;
+	
+	act_reg = alloc (sizeof (act_reg_t));
+	
+	//install_chip (sim, & woodstock_cpu_chip_detail, act_reg);
+	
+	woodstock_new_rom_addr_space (act_reg, MAX_BANK, MAX_PAGE, N_PAGE_SIZE);
+	woodstock_new_ram_addr_space (act_reg, ram_size);
+	
+	// ten digits plus special-case for sign
+	act_reg->display_digits = 11; // MAX_DIGIT_POSITION; // Spice calcs use 11 digit
+	act_reg->display_scan_fn = spice_display_scan;
+	act_reg->left_scan = WSIZE - 2;
+	act_reg->right_scan = 3;
+	
+	act_reg->display_scan_position = act_reg->left_scan;
+	act_reg->display_digit_position = 0;
+	
+	act_reg->char_gen = char_gen;
+	
+	init_ops (act_reg);
+	
+	act_reg->display = display;
+	//chip_event (sim, event_reset, NULL, 0, NULL);
+	spice_event_fn (act_reg, event_reset);
+	
+	return act_reg;
+}
+
+/*static void woodstock_free_processor (act_reg_t *act_reg)
+{
+	//remove_chip (sim->first_chip);
+}*/
+
+static void woodstock_event_fn (act_reg_t *act_reg, int event)
+{
+	switch (event)
+    {
+		case event_reset:
+			woodstock_reset (act_reg);
+			break;
+		case event_clear_memory:
+			woodstock_clear_memory (act_reg);
+			break;
+		case event_restore_completed:
+			// force display update
+			break;
+		default:
+			// warning ("proc_woodstock: unknown event %d\n", event);
+			break;
+    }
+}
+
+static void spice_event_fn (act_reg_t *act_reg, int event)
+{
+	switch (event)
+    {
+		case event_reset:
+			spice_reset (act_reg);
+			break;
+		case event_clear_memory:
+			woodstock_clear_memory (act_reg);
+			break;
+		case event_restore_completed:
+			// force display update
+			break;
+		default:
+			// warning ("proc_woodstock: unknown event %d\n", event);
+			break;
+    }
+}
+
+
+bool woodstock_read_object_file (act_reg_t *act_reg, const char *fn)
 {
 	FILE *f;
 	int bank;
 	int addr;  // should change to addr_t, but will have to change
-	// the parse function profiles to match.
+			   // the parse function profiles to match.
 	rom_word_t opcode;
 	int count = 0;
 	char buf [80];
-	//char magic [4];
-	//bool eof, error;
+	char magic [4];
+	bool eof, error;
 	
 	f = fopen (fn, "rb");
 	if (! f)
@@ -1229,13 +1760,16 @@ bool woodstock_read_object_file (cpu_t *act_reg, const char *fn)
 		return (false);
     }
 	
-	//if (fread_bytes (f, magic, sizeof (magic), & eof, & error) != sizeof (magic))
-    //{
-	//	fprintf (stderr, "error reading object file\n");
-	//	return (false);
-    //}
+	if (fread_bytes (f, magic, sizeof (magic), & eof, & error) != sizeof (magic))
+    {
+		fprintf (stderr, "error reading object file\n");
+		return (false);
+    }
 	
-	//f = freopen (fn, "r", f);
+	//if (strncmp (magic, "MOD1", sizeof (magic)) == 0)
+	//	return sim_read_mod1_file (sim, f);
+	
+	f = freopen (fn, "r", f);
 	
 	if (! f)
     {
@@ -1261,3 +1795,4 @@ bool woodstock_read_object_file (cpu_t *act_reg, const char *fn)
 #endif
 	return (true);
 }
+

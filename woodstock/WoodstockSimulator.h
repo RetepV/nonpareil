@@ -24,7 +24,7 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-12-26.
-//  Copyright 2005-2012 Maciej Bartosiak
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import <Cocoa/Cocoa.h>
@@ -34,7 +34,6 @@
 #ifdef NONPAREIL_21
 
 #define NNPR_OBJ	@"21"
-#define NNPR_STATE	@"state.nonpareil-21"
 #define NNPR_RAM	0
 #define NNPR_CLOCK	185000
 #define NNPR_WSIZE	56.0
@@ -42,9 +41,50 @@
 #elif NONPAREIL_25
 
 #define NNPR_OBJ	@"25"
-#define NNPR_STATE	@"state.nonpareil-25"
 #define NNPR_RAM	16
 #define NNPR_CLOCK	185000
+#define NNPR_WSIZE	56.0
+
+#elif NONPAREIL_32E
+
+#define NNPR_OBJ	@"32e"
+#define NNPR_RAM	32
+#define NNPR_CLOCK	140000.0
+#define NNPR_WSIZE	56.0
+
+#elif NONPAREIL_33C
+
+#define NNPR_OBJ	@"33c"
+#define NNPR_RAM	32
+#define NNPR_CLOCK	140000.0
+#define NNPR_WSIZE	56.0
+
+#elif NONPAREIL_34C
+
+#define NNPR_OBJ	@"34c"
+#define NNPR_RAM	64
+#define NNPR_CLOCK	140000.0
+#define NNPR_WSIZE	56.0
+
+#elif NONPAREIL_37E
+
+#define NNPR_OBJ	@"37e"
+#define NNPR_RAM	48
+#define NNPR_CLOCK	140000.0
+#define NNPR_WSIZE	56.0
+
+#elif NONPAREIL_38C
+
+#define NNPR_OBJ	@"38c"
+#define NNPR_RAM	48
+#define NNPR_CLOCK	140000.0
+#define NNPR_WSIZE	56.0
+
+#elif NONPAREIL_38E
+
+#define NNPR_OBJ	@"38e"
+#define NNPR_RAM	48
+#define NNPR_CLOCK	140000.0
 #define NNPR_WSIZE	56.0
 
 #else
@@ -53,32 +93,29 @@
 
 #endif
 
+#ifdef NONPAREIL_INTERNAL
 #import "display.h"
+#import "proc.h"
 #import "digit_ops.h"
-#import "utils.h"
 #import "proc_woodstock.h"
+#endif
 
 @interface WoodstockSimulator : NSObject
 {
 	NSTimeInterval	lastRun;
-    LEDDisplayView *display;
-    
-	cpu_t *cpu;
-    
-    segment_bitmap_t display_segments [MAX_DIGIT_POSITION];
+#ifdef NONPAREIL_INTERNAL
+	act_reg_t *cpu;
+	
+	//segment_bitmap_t disp_buf[MAX_DIGIT_POSITION+1];
+	//segment_bitmap_t disp_old[MAX_DIGIT_POSITION+1];
+#endif
 }
-- (id)init;
+- (id)initWithDisplay: (LEDDisplayView *)display;
 - (void)pressKey: (int)key;
 - (void)readKeysFrom: (NSMutableArray *) keyQueue;
 - (void)executeCycle;
-- (BOOL)displayScan;
-- (BOOL)getFlag: (int)num;
 - (void)setFlag: (int)num withBool: (BOOL)state;
 - (int)displayDigits;
 - (segment_bitmap_t *)displaySegments;
-- (void)saveState;
-- (void)readState;
-
-@property (nonatomic, strong) LEDDisplayView *display;
-
+- (BOOL)printState;
 @end

@@ -20,29 +20,29 @@
  */
 
 //
-// any changes since 0.77 copyright 2005-2012 Maciej Bartosiak
+// changes for mac os x by Maciej Bartosiak
 //
 
+
 #define VOYAGER_DISPLAY_DIGITS 11
-#define VOYAGER_DISPLAY_BLINK_DIVISOR 10//45 //150
 
 // The Voyager display doesn't have a peripheral address like the
 // Coconut display, but we have to pick a chip number somehow, so we'll
 // use the same one.
-//#define PFADDR_LCD_DISPLAY 0xfd
+#define PFADDR_LCD_DISPLAY 0xfd
 
 struct nut_reg_t;
 
 typedef struct
 {
 	bool enable;
-	//int count;
+	int count;
 	
 	bool blink;
 	bool blink_state;
 	int blink_count;
 } voyager_display_reg_t;
 
-void voyager_display_reset (struct nut_reg_t *nut_reg);
-void voyager_display_sleep(struct nut_reg_t *nut_reg);
+
 void voyager_display_init (struct nut_reg_t *nut_reg);
+void display_callback(struct nut_reg_t *nv);

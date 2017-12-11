@@ -24,15 +24,12 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-10-26.
-//  Copyright 2005-2012 Maciej Bartosiak.
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import "SpiceController.h"
 
 @implementation SpiceController
-#if (!defined (NONPAREIL_32E))
-@synthesize modeSwitch;
-#endif
 
 #define JIFFY_PER_SEC 30.0
 
@@ -41,14 +38,10 @@
 	[NSApp setDelegate:self];
 		
 	keyQueue = [[NSMutableArray alloc] init];
-	simulator = [[SpiceSimulator alloc] init];
-    simulator.display = display;
-#if (!defined (NONPAREIL_32E))
-    self.modeSwitch.state = [simulator getFlag: 3];
-#endif
+	simulator = [[SpiceSimulator alloc] initWithDisplay: display];
 	[display setupDisplayWith: [simulator displaySegments]
 						count: [simulator displayDigits]
-					  //yOffset: 15.0
+					  yOffset: 15.0
 				  digitHeight: 16.0
 				   digitWidth: 8.0 
 				  digitOffset: 12.0
@@ -56,23 +49,23 @@
 				  digitStroke: 1.5
 					dotOffset: 6.0];
 	
-	timer = [NSTimer scheduledTimerWithTimeInterval:(1.0/JIFFY_PER_SEC)
+	timer = [[NSTimer scheduledTimerWithTimeInterval:(1.0/JIFFY_PER_SEC)
 											  target:self
 											selector:@selector(run:)
 											userInfo:nil
-											 repeats:YES];
+											 repeats:YES] retain];
 	
 }
 
 - (IBAction)buttonPressed:(id)sender
 {
-	[keyQueue insertObject:[NSNumber numberWithInteger: [sender tag]] atIndex:0];
+	[keyQueue insertObject:[NSNumber numberWithInt: [sender tag]] atIndex:0];
 	[keyQueue insertObject:[NSNumber numberWithInt: -1] atIndex:0];
 }
 
 - (IBAction)modeSwitch:(id)sender
 {
-	NSInteger fff = [sender state];
+	int fff = [sender state];
 	if (fff == NSOnState)
 	{
 		[simulator setFlag: 3 withBool:true];
@@ -92,10 +85,11 @@
 - (void)quit
 {
     [timer invalidate];
+    //if (! write_ram_file (ram))
+	[simulator printState];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-	[simulator saveState];
     [self quit];
 }
 

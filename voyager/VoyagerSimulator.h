@@ -80,11 +80,12 @@
 	NSTimeInterval	lastRun;
 	VoyagerDisplayView *display;
     
-	cpu_t *cpu;
+	nut_reg_t *cpu;
 	
 	segment_bitmap_t display_segments [MAX_DIGIT_POSITION];
 }
-- (id)init;
+- (id)initWithDisplay: (VoyagerDisplayView *)display;
+//- (id)init;
 - (void)pressKey: (int)key;
 - (void)readKeysFrom: (NSMutableArray *) keyQueue;
 - (void)executeCycle;

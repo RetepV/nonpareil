@@ -11,32 +11,33 @@
 const NSAffineTransformStruct identity = {1,0,0,1,0,0};
 
 @implementation NSAffineTransform (Shearing)
-  
+
 - (void) shearXBy: (float) xShear yBy: (float) yShear;
-  {
-  NSAffineTransform 
+{
+    NSAffineTransform
     *shearTransform = [[NSAffineTransform alloc] init];
     
-  NSAffineTransformStruct 
+    NSAffineTransformStruct
     transformStruct = [shearTransform transformStruct];
     
-  transformStruct.m21 = xShear;
-  transformStruct.m12 = yShear;
-  
-  [shearTransform setTransformStruct:transformStruct];
-  [self appendTransform:shearTransform];
-  }
+    transformStruct.m21 = xShear;
+    transformStruct.m12 = yShear;
+    
+    [shearTransform setTransformStruct:transformStruct];
+    [self appendTransform:shearTransform];
+    // [shearTransform release];
+}
 
-  // In case you only want to shear one axis at a time...
+// In case you only want to shear one axis at a time...
 - (void) shearXBy:(float) xShear { [self shearXBy:xShear yBy:0.0];  }
 - (void) shearYBy:(float) yShear  {  [self shearXBy:0.0 yBy:yShear]; }
 
 - (NSAffineTransform *) resetToIdentityMatrix
-  {
-  [self setTransformStruct:identity];
-  return self;
-  }
-  
+{
+    [self setTransformStruct:identity];
+    return self;
+}
+
 @end
 
 

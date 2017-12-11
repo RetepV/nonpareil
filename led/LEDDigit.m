@@ -49,52 +49,59 @@
 	[NSBezierPath setDefaultLineWidth: stroke];
 	//[NSBezierPath setDefaultLineCapStyle: NSRoundLineCapStyle];
 	
-	a = [NSBezierPath bezierPath];
-	[a moveToPoint:	NSMakePoint(    0.0,    0.0)];
-	[a lineToPoint:	NSMakePoint( digitW,    0.0)];
+	a = [[NSBezierPath bezierPath] retain];
+	[a moveToPoint:			NSMakePoint(    0.0, digitH)];
+	[a relativeLineToPoint:	NSMakePoint( digitW,    0.0)];
 	
-	b = [NSBezierPath bezierPath];
-	[b moveToPoint:	NSMakePoint( digitW,	0.0)];
-	[b lineToPoint:	NSMakePoint( digitW, digith)];
+	b = [[NSBezierPath bezierPath] retain];
+	[b moveToPoint:			NSMakePoint( digitW, digitH)];
+	[b relativeLineToPoint:	NSMakePoint(    0.0,-digith)];
 	
-	c = [NSBezierPath bezierPath];
-	[c moveToPoint:	NSMakePoint( digitW, digith)];
-	[c lineToPoint:	NSMakePoint( digitW, digitH)];
+	c = [b copy];
+	tmp = [NSAffineTransform transform];
+	[tmp translateXBy: 0.0 yBy: digitH];
+	[tmp scaleXBy: 1.0 yBy: -1.0];
+	[c transformUsingAffineTransform: tmp];
 	
-	d = [NSBezierPath bezierPath];
-	[d moveToPoint:	NSMakePoint(	0.0, digitH)];
-	[d lineToPoint:	NSMakePoint( digitW, digitH)];
+	d = [a copy];
+	tmp = [NSAffineTransform transform];
+	[tmp translateXBy: 0.0 yBy: digitH];
+	[tmp scaleXBy: 1.0 yBy: -1.0];
+	[d transformUsingAffineTransform: tmp];
 	
-	e = [NSBezierPath bezierPath];
-	[e moveToPoint:	NSMakePoint(	0.0, digith)];
-	[e lineToPoint:	NSMakePoint(	0.0, digitH)];
+	e = [b copy];
+	tmp = [NSAffineTransform transform];
+	[tmp translateXBy: digitW yBy: digitH];
+	[tmp scaleXBy: -1.0 yBy: -1.0];
+	[e transformUsingAffineTransform: tmp];
 	
-	f = [NSBezierPath bezierPath];
-	[f moveToPoint:	NSMakePoint(	0.0,	0.0)];
-	[f lineToPoint:	NSMakePoint(	0.0, digith)];
+	f = [c copy];
+	tmp = [NSAffineTransform transform];
+	[tmp translateXBy: digitW yBy: digitH];
+	[tmp scaleXBy: -1.0 yBy: -1.0];
+	[f transformUsingAffineTransform: tmp];
 	
-	g = [NSBezierPath bezierPath];
-	[g moveToPoint:	NSMakePoint(	0.0, digith)];
-	[g lineToPoint:	NSMakePoint( digitW, digith)];
+	g = [[NSBezierPath bezierPath] retain];
+	[g moveToPoint:			NSMakePoint(   0.0, digith)];
+	[g relativeLineToPoint:	NSMakePoint(digitW,    0.0)];
 	
 	// "dot" segment
-	h = [NSBezierPath bezierPath];
-	[h moveToPoint:	NSMakePoint(digitW+dotOff-1.0, digitH-1.0)];
-	[h lineToPoint:	NSMakePoint(digitW+dotOff-1.0, digitH+1.0)];
-	[h lineToPoint:	NSMakePoint(digitW+dotOff-2.0, digitH+1.0)];
-	[h lineToPoint:	NSMakePoint(digitW+dotOff-2.0, digitH-1.0)];
+	h = [[NSBezierPath bezierPath] retain];
+	[h moveToPoint:			NSMakePoint(digitW+dotOff, -1.0)];
+	[h relativeLineToPoint:	NSMakePoint(           0.0, 2.0)];
+	[h relativeMoveToPoint:	NSMakePoint(          -1.0, 0.0)];
+	[h relativeLineToPoint:	NSMakePoint(           0.0,-2.0)];
 	//[h closePath];
 	
 	// "," segment
 	
-	i = [NSBezierPath bezierPath];
-	[i moveToPoint:	NSMakePoint(digitW + dotOff-1.0, digitH /*-DIGIT_o*/)];
-	[i lineToPoint:	NSMakePoint(digitW + dotOff-1.0-dotOff/3.0, digitH+dotOff/2.0)];
+	i = [[NSBezierPath bezierPath] retain];
+	[i moveToPoint:			NSMakePoint(digitW + dotOff, 0.0 /*-DIGIT_o*/)];
+	[i relativeLineToPoint:	NSMakePoint(    -dotOff/3.0,      -dotOff/2.0)];
 	
 	tmp = [NSAffineTransform transform];
 	[tmp shearXBy: share]; 
 	[tmp translateXBy: x + 0.5 yBy: y + 0.5];
-	[tmp scaleXBy:1.0 yBy:-1.0];
 	[a transformUsingAffineTransform: tmp];
 	[b transformUsingAffineTransform: tmp];
 	[c transformUsingAffineTransform: tmp];
@@ -122,7 +129,7 @@
 - (void) drawDigit: (segment_bitmap_t)dig
 {
 #if 0
-	[[NSColor darkGrayColor] set];
+	[[NSColor blackColor] set];
 	[a stroke];
 	[b stroke];
 	[c stroke];

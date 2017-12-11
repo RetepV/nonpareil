@@ -24,7 +24,7 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-10-26.
-//  Copyright 2005-2012 Maciej Bartosiak.
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import "LEDDisplayView.h"
@@ -61,7 +61,7 @@
 
 - (void)setupDisplayWith: (segment_bitmap_t *)disps
 				   count: (int) count
-				 //yOffset: (float) y
+				 yOffset: (float) y
 			 digitHeight: (float) digitHeight
 			  digitWidth: (float) digitWidth
 			 digitOffset: (float) digitOffset
@@ -73,9 +73,7 @@
 	NSMutableArray *tmp;
 	
 	int i;
-	//float xOff = ([self frame].size.width - ((count) * (digitWidth + digitOffset)))/2.0;
-	float xOff = ([self frame].size.width - ((count) * (digitWidth + digitOffset)))/2.0 ;//+ digitWidth/4.0;
-	float yOff = (([self frame].size.height + digitHeight) / 2.0 - 1.0);//- digitHeight/4.0;
+	float xOff = ([self frame].size.width - ((count) * (digitWidth + digitOffset)))/2.0;
 	
 	dc = count;
 	ds = disps;
@@ -90,13 +88,19 @@
 											 stroke: digitStroke
 										  dotOffset: dotOffset
 												  x: xOff
-												  y: yOff];
+												  y: y];
 		
 		[tmp insertObject: dig atIndex: i];
+		[dig release];
 		xOff += (digitWidth + digitOffset);
 	}
 	
 	digits = [[NSArray alloc] initWithArray: tmp];
+}
+
+- (void)updateDisplay
+{
+	[self setNeedsDisplay: YES];
 }
 
 @end

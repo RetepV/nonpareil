@@ -52,5 +52,6 @@
 			  digitShare: (float) digitShare
 			 digitStroke: (float) digitStroke
 			   dotOffset: (float) dotOffset;
+- (void)updateDisplay;
 
 @end

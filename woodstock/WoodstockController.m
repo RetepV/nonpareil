@@ -24,13 +24,12 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-12-26.
-//  Copyright 2005-2012 Maciej Bartosiak
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import "WoodstockController.h"
 
 @implementation WoodstockController
-@synthesize modeSwitch;
 
 #define JIFFY_PER_SEC 30.0
 
@@ -39,13 +38,10 @@
 	[NSApp setDelegate:self];
 		
 	keyQueue = [[NSMutableArray alloc] init];
-	simulator = [[WoodstockSimulator alloc] init];
-    simulator.display = display;
-    self.modeSwitch.state = [simulator getFlag: 3];
-    
+	simulator = [[WoodstockSimulator alloc] initWithDisplay: display];
 	[display setupDisplayWith: [simulator displaySegments]
 						count: [simulator displayDigits]
-					  //yOffset: 15.0
+					  yOffset: 15.0
 				  digitHeight: 14.0
 				   digitWidth: 7.0 
 				  digitOffset: 10.0
@@ -53,23 +49,23 @@
 				  digitStroke: 1.5
 					dotOffset: 6.0];
 	
-	timer = [NSTimer scheduledTimerWithTimeInterval:(1.0/JIFFY_PER_SEC)
+	timer = [[NSTimer scheduledTimerWithTimeInterval:(1.0/JIFFY_PER_SEC)
 											  target:self
 											selector:@selector(run:)
 											userInfo:nil
-											 repeats:YES];
+											 repeats:YES] retain];
 	
 }
 
 - (IBAction)buttonPressed:(id)sender
 {
-	[keyQueue insertObject:[NSNumber numberWithInteger: [sender tag]] atIndex:0];
+	[keyQueue insertObject:[NSNumber numberWithInt: [sender tag]] atIndex:0];
 	[keyQueue insertObject:[NSNumber numberWithInt: -1] atIndex:0];
 }
 
 - (IBAction)modeSwitch:(id)sender
 {
-	NSInteger fff = [sender state];
+	int fff = [sender state];
 	if (fff == NSOnState)
 	{
 		[simulator setFlag: 3 withBool:true];
@@ -89,10 +85,11 @@
 - (void)quit
 {
     [timer invalidate];
+    //if (! write_ram_file (ram))
+	[simulator printState];
 }
 
 - (void)applicationWillTerminate:(NSNotification *)aNotification {
-	[simulator saveState];
     [self quit];
 }
 

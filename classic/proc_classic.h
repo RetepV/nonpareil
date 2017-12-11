@@ -19,14 +19,12 @@ Free Software Foundation, Inc., 59 Temple Place - Suite 330, Boston,
 MA 02111, USA.
 */
 
-//
-// any changes since nonpareil 0.77 copyright 2005-2012 Maciej Bartosiak
-//
 
-#define CLASSIC_LEFT_SCAN (WSIZE - 1)
-#define CLASSIC_RIGHT_SCAN 0
+#define WSIZE 14
+#define EXPSIZE 3  // two exponent and one exponent sign digit
 
-#define CLASSIC_DISPLAY_DIGITS 14
+typedef digit_t reg_t [WSIZE];
+
 
 #define SSIZE 12
 #define EXT_FLAG_SIZE 12
@@ -48,72 +46,100 @@ MA 02111, USA.
   #define N_PAGE_SIZE (ROM_SIZE)
 #endif
 
-//struct cpu_t;
+//struct classic_cpu_reg_t;
 
-typedef struct classic_cpu_t
+typedef struct classic_cpu_reg_t
 {
-    reg_t a;
-    reg_t b;
-    reg_t c;
-    reg_t d;
-    reg_t e;
-    reg_t f;
-    reg_t m;
-    
-    digit_t p;
-    
-    bool carry;
-    
-    uint8_t pc;
-    uint8_t rom;
-    uint8_t group;
-    
-    uint8_t del_rom;
-    uint8_t del_grp;
-    
-    uint8_t ret_pc;
-    
-    uint16_t s;
-    uint16_t ext_flag;  // external flags, e.g., slide switches, magnetic card inserted
-    
-    // keyboard
-    bool key_flag;      /* true if a key is down */
-    int key_buf;        /* most recently pressed key */
-    
-    // display
-    bool display_enable;
-    
-    // ROM:
-    rom_word_t  *ucode;  // name "rom" was already taken
-    
-    // RAM
-    uint16_t    max_ram;
-    uint16_t    ram_addr;  /* selected RAM address */
-    reg_t       *ram;
-} cpu_t;
+  reg_t a;
+  reg_t b;
+  reg_t c;
+  reg_t d;
+  reg_t e;
+  reg_t f;
+  reg_t m;
 
-cpu_t *classic_new_processor (int ram_size);
+  digit_t p;
 
-bool classic_read_rom (cpu_t *cpu_reg,
+  bool carry, prev_carry;
+
+  bool s [SSIZE];
+
+  uint8_t pc;
+  uint8_t rom;
+  uint8_t group;
+
+  uint8_t del_rom;
+  uint8_t del_grp;
+
+  uint8_t ret_pc;
+
+  int prev_pc;  /* used to store complete five-digit octal address of instruction */
+
+  bool ext_flag [SSIZE];  /* external flags, e.g., slide switches,
+			     magnetic card inserted */
+
+  // keyboard
+  bool key_flag;      /* true if a key is down */
+  int key_buf;        /* most recently pressed key */
+
+  // display
+  bool display_enable;
+
+  int left_scan;
+  int right_scan;
+  int display_scan_position;   /* word index, left_scan down to right_scan */
+  int display_digit_position;  /* character index, 0 to MAX_DIGIT_POSITION-1 */
+
+  void (* display_scan_fn) (struct classic_cpu_reg_t *cpu_reg);
+
+  void (* op_fcn [1024])(struct classic_cpu_reg_t *cpu_reg, int opcode);
+
+  // ROM:
+  rom_word_t *ucode;  // name "rom" was already taken
+  bool *rom_exists;
+  bool *rom_breakpoint;
+
+  // RAM
+  uint16_t   max_ram;
+  int ram_addr;  /* selected RAM address */
+  reg_t *ram;
+  
+  //sim_t *sim;
+  uint64_t cycle_count;
+  
+  
+  // moved from sim_t;
+  segment_bitmap_t display_segments [MAX_DIGIT_POSITION];
+  segment_bitmap_t *char_gen;
+  int display_digits;
+  
+  //bool need_redraw;
+  void *display;
+} classic_cpu_reg_t;
+
+classic_cpu_reg_t *classic_new_processor (int ram_size, void *display);
+
+bool classic_read_rom (classic_cpu_reg_t *cpu_reg,
 					   uint8_t    bank,
 					   addr_t     addr,
 					   rom_word_t *val);
 
-bool classic_write_rom (cpu_t *cpu_reg,
+bool classic_write_rom (classic_cpu_reg_t *cpu_reg,
 						uint8_t    bank,
 						addr_t     addr,
 						rom_word_t *val);
 
-bool classic_write_rom (cpu_t *cpu_reg,
+bool classic_write_rom (classic_cpu_reg_t *cpu_reg,
 						uint8_t    bank,
 						addr_t     addr,
 						rom_word_t *val);
 
-bool classic_execute_instruction (cpu_t *cpu_reg);
-void classic_press_key (cpu_t *cpu_reg, int keycode);
-void classic_release_key (cpu_t *cpu_reg);
-void classic_set_ext_flag (cpu_t *cpu_reg, int flag, bool state);
-bool classic_get_ext_flag (cpu_t *cpu_reg, int flag);
-void classic_reset (cpu_t *cpu_reg);
-void classic_clear_memory (cpu_t *cpu_reg);
-bool classic_read_object_file (cpu_t *cpu_reg, const char *fn);
+bool classic_execute_instruction (classic_cpu_reg_t *cpu_reg);
+
+void classic_press_key (classic_cpu_reg_t *cpu_reg, int keycode);
+
+void classic_release_key (classic_cpu_reg_t *cpu_reg);
+
+void classic_set_ext_flag (classic_cpu_reg_t *cpu_reg, int flag, bool state);
+
+bool classic_read_object_file (classic_cpu_reg_t *cpu_reg, const char *fn);

@@ -36,6 +36,30 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		057DA6A91E09F0B300AE4D1A /* proc_nut.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A51E09EE0900AE4D1A /* proc_nut.c */; };
+		057DA6AA1E09F0B400AE4D1A /* proc_nut.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A51E09EE0900AE4D1A /* proc_nut.c */; };
+		057DA6AB1E09F0B400AE4D1A /* proc_nut.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A51E09EE0900AE4D1A /* proc_nut.c */; };
+		057DA6AC1E09F0B500AE4D1A /* proc_nut.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A51E09EE0900AE4D1A /* proc_nut.c */; };
+		057DA6AD1E09F0B800AE4D1A /* voyager_lcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A71E09EE0900AE4D1A /* voyager_lcd.c */; };
+		057DA6AE1E09F0B800AE4D1A /* voyager_lcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A71E09EE0900AE4D1A /* voyager_lcd.c */; };
+		057DA6AF1E09F0B900AE4D1A /* voyager_lcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A71E09EE0900AE4D1A /* voyager_lcd.c */; };
+		057DA6B01E09F0B900AE4D1A /* voyager_lcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A71E09EE0900AE4D1A /* voyager_lcd.c */; };
+		057DA6B11E09F0C600AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6B21E09F0C600AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6B31E09F0C700AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6B41E09F0CB00AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6B51E09F0CC00AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6B61E09F0CC00AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6B71E09F0CD00AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6B81E09F0CD00AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6B91E09F0CE00AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6BA1E09F0CF00AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6BB1E09F0CF00AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6BC1E09F0D000AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6BD1E09F0D100AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6BE1E09F0D200AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6BF1E09F0D300AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
+		057DA6C01E09F0D300AE4D1A /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 057DA6A31E09ED5200AE4D1A /* utils.c */; };
 		0C04EFC414A46BBD006FD07E /* 33c-0-0.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C04EFA314A46BBD006FD07E /* 33c-0-0.png */; };
 		0C04EFC514A46BBD006FD07E /* 33c-0-1.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C04EFA414A46BBD006FD07E /* 33c-0-1.png */; };
 		0C04EFC614A46BBD006FD07E /* 33c-0-2.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C04EFA514A46BBD006FD07E /* 33c-0-2.png */; };
@@ -361,14 +385,6 @@
 		0C04F21114A47A45006FD07E /* 16c-3-8.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C04F1E914A47A45006FD07E /* 16c-3-8.png */; };
 		0C04F21214A47A45006FD07E /* 16c-3-9.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C04F1EA14A47A45006FD07E /* 16c-3-9.png */; };
 		0C04F21314A47A45006FD07E /* 16c-background.png in Resources */ = {isa = PBXBuildFile; fileRef = 0C04F1EB14A47A45006FD07E /* 16c-background.png */; };
-		0C04F22114A47A97006FD07E /* proc_nut.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21514A47A97006FD07E /* proc_nut.c */; };
-		0C04F22214A47A97006FD07E /* proc_nut.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21514A47A97006FD07E /* proc_nut.c */; };
-		0C04F22314A47A97006FD07E /* proc_nut.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21514A47A97006FD07E /* proc_nut.c */; };
-		0C04F22414A47A97006FD07E /* proc_nut.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21514A47A97006FD07E /* proc_nut.c */; };
-		0C04F22514A47A97006FD07E /* voyager_lcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21714A47A97006FD07E /* voyager_lcd.c */; };
-		0C04F22614A47A97006FD07E /* voyager_lcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21714A47A97006FD07E /* voyager_lcd.c */; };
-		0C04F22714A47A97006FD07E /* voyager_lcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21714A47A97006FD07E /* voyager_lcd.c */; };
-		0C04F22814A47A97006FD07E /* voyager_lcd.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21714A47A97006FD07E /* voyager_lcd.c */; };
 		0C04F22914A47A97006FD07E /* VoyagerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21A14A47A97006FD07E /* VoyagerController.m */; };
 		0C04F22A14A47A97006FD07E /* VoyagerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21A14A47A97006FD07E /* VoyagerController.m */; };
 		0C04F22B14A47A97006FD07E /* VoyagerController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C04F21A14A47A97006FD07E /* VoyagerController.m */; };
@@ -449,22 +465,6 @@
 		0C20195614A3E86C0022568C /* digit_ops.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194414A3E86C0022568C /* digit_ops.c */; };
 		0C20195714A3E86C0022568C /* digit_ops.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194414A3E86C0022568C /* digit_ops.c */; };
 		0C20195814A3E86C0022568C /* digit_ops.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194414A3E86C0022568C /* digit_ops.c */; };
-		0C20195914A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20195A14A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20195B14A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20195C14A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20195D14A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20195E14A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20195F14A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196014A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196114A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196214A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196314A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196414A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196514A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196614A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196714A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
-		0C20196814A3E86C0022568C /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 0C20194714A3E86C0022568C /* utils.c */; };
 		0C20196E14A3E8A50022568C /* LEDDigit.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C20196B14A3E8A50022568C /* LEDDigit.m */; };
 		0C20196F14A3E8A50022568C /* LEDDigit.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C20196B14A3E8A50022568C /* LEDDigit.m */; };
 		0C20197014A3E8A50022568C /* LEDDigit.m in Sources */ = {isa = PBXBuildFile; fileRef = 0C20196B14A3E8A50022568C /* LEDDigit.m */; };
@@ -841,6 +841,13 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		057DA6A11E09ED2700AE4D1A /* proc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = proc.h; path = common/proc.h; sourceTree = "<group>"; };
+		057DA6A21E09ED2700AE4D1A /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = common/utils.h; sourceTree = "<group>"; };
+		057DA6A31E09ED5200AE4D1A /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utils.c; path = common/utils.c; sourceTree = "<group>"; };
+		057DA6A51E09EE0900AE4D1A /* proc_nut.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = proc_nut.c; path = voyager/proc_nut.c; sourceTree = "<group>"; };
+		057DA6A61E09EE0900AE4D1A /* proc_nut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = proc_nut.h; path = voyager/proc_nut.h; sourceTree = "<group>"; };
+		057DA6A71E09EE0900AE4D1A /* voyager_lcd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = voyager_lcd.c; path = voyager/voyager_lcd.c; sourceTree = "<group>"; };
+		057DA6A81E09EE0900AE4D1A /* voyager_lcd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = voyager_lcd.h; path = voyager/voyager_lcd.h; sourceTree = "<group>"; };
 		0C04EFA314A46BBD006FD07E /* 33c-0-0.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "33c-0-0.png"; path = "bitmaps/33c/33c-0-0.png"; sourceTree = "<group>"; };
 		0C04EFA414A46BBD006FD07E /* 33c-0-1.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "33c-0-1.png"; path = "bitmaps/33c/33c-0-1.png"; sourceTree = "<group>"; };
 		0C04EFA514A46BBD006FD07E /* 33c-0-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "33c-0-2.png"; path = "bitmaps/33c/33c-0-2.png"; sourceTree = "<group>"; };
@@ -1133,10 +1140,6 @@
 		0C04F1E914A47A45006FD07E /* 16c-3-8.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "16c-3-8.png"; path = "bitmaps/16c/16c-3-8.png"; sourceTree = "<group>"; };
 		0C04F1EA14A47A45006FD07E /* 16c-3-9.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "16c-3-9.png"; path = "bitmaps/16c/16c-3-9.png"; sourceTree = "<group>"; };
 		0C04F1EB14A47A45006FD07E /* 16c-background.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "16c-background.png"; path = "bitmaps/16c/16c-background.png"; sourceTree = "<group>"; };
-		0C04F21514A47A97006FD07E /* proc_nut.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = proc_nut.c; path = voyager/proc_nut.c; sourceTree = "<group>"; };
-		0C04F21614A47A97006FD07E /* proc_nut.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = proc_nut.h; path = voyager/proc_nut.h; sourceTree = "<group>"; };
-		0C04F21714A47A97006FD07E /* voyager_lcd.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = voyager_lcd.c; path = voyager/voyager_lcd.c; sourceTree = "<group>"; };
-		0C04F21814A47A97006FD07E /* voyager_lcd.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = voyager_lcd.h; path = voyager/voyager_lcd.h; sourceTree = "<group>"; };
 		0C04F21914A47A97006FD07E /* VoyagerController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VoyagerController.h; path = voyager/VoyagerController.h; sourceTree = "<group>"; };
 		0C04F21A14A47A97006FD07E /* VoyagerController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = VoyagerController.m; path = voyager/VoyagerController.m; sourceTree = "<group>"; };
 		0C04F21B14A47A97006FD07E /* VoyagerDigit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VoyagerDigit.h; path = voyager/VoyagerDigit.h; sourceTree = "<group>"; };
@@ -1186,8 +1189,6 @@
 		0C20194414A3E86C0022568C /* digit_ops.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = digit_ops.c; path = common/digit_ops.c; sourceTree = "<group>"; };
 		0C20194514A3E86C0022568C /* digit_ops.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = digit_ops.h; path = common/digit_ops.h; sourceTree = "<group>"; };
 		0C20194614A3E86C0022568C /* display.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = display.h; path = common/display.h; sourceTree = "<group>"; };
-		0C20194714A3E86C0022568C /* utils.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = utils.c; path = common/utils.c; sourceTree = "<group>"; };
-		0C20194814A3E86C0022568C /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = utils.h; path = common/utils.h; sourceTree = "<group>"; };
 		0C20196A14A3E8A50022568C /* LEDDigit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LEDDigit.h; path = led/LEDDigit.h; sourceTree = "<group>"; };
 		0C20196B14A3E8A50022568C /* LEDDigit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = LEDDigit.m; path = led/LEDDigit.m; sourceTree = "<group>"; };
 		0C20196C14A3E8A50022568C /* LEDDisplayView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LEDDisplayView.h; path = led/LEDDisplayView.h; sourceTree = "<group>"; };
@@ -1848,10 +1849,10 @@
 		0C04F21414A47A73006FD07E /* voyager */ = {
 			isa = PBXGroup;
 			children = (
-				0C04F21514A47A97006FD07E /* proc_nut.c */,
-				0C04F21614A47A97006FD07E /* proc_nut.h */,
-				0C04F21714A47A97006FD07E /* voyager_lcd.c */,
-				0C04F21814A47A97006FD07E /* voyager_lcd.h */,
+				057DA6A51E09EE0900AE4D1A /* proc_nut.c */,
+				057DA6A61E09EE0900AE4D1A /* proc_nut.h */,
+				057DA6A71E09EE0900AE4D1A /* voyager_lcd.c */,
+				057DA6A81E09EE0900AE4D1A /* voyager_lcd.h */,
 				0C04F21914A47A97006FD07E /* VoyagerController.h */,
 				0C04F21A14A47A97006FD07E /* VoyagerController.m */,
 				0C04F21B14A47A97006FD07E /* VoyagerDigit.h */,
@@ -1928,11 +1929,12 @@
 		0C20194314A3E8500022568C /* common */ = {
 			isa = PBXGroup;
 			children = (
-				0C20194414A3E86C0022568C /* digit_ops.c */,
+				057DA6A11E09ED2700AE4D1A /* proc.h */,
+				057DA6A21E09ED2700AE4D1A /* utils.h */,
+				057DA6A31E09ED5200AE4D1A /* utils.c */,
 				0C20194514A3E86C0022568C /* digit_ops.h */,
+				0C20194414A3E86C0022568C /* digit_ops.c */,
 				0C20194614A3E86C0022568C /* display.h */,
-				0C20194714A3E86C0022568C /* utils.c */,
-				0C20194814A3E86C0022568C /* utils.h */,
 			);
 			name = common;
 			sourceTree = "<group>";
@@ -3177,9 +3179,9 @@
 				0CCABAE514A3E2BD0014410F /* main.m in Sources */,
 				0C20190614A3E5E10022568C /* ClassicController.m in Sources */,
 				0C20190A14A3E5E10022568C /* ClassicSimulator.m in Sources */,
+				057DA6B11E09F0C600AE4D1A /* utils.c in Sources */,
 				0C20190E14A3E5E10022568C /* proc_classic.c in Sources */,
 				0C20194914A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20195914A3E86C0022568C /* utils.c in Sources */,
 				0C20196E14A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20197A14A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20198814A3E8DC0022568C /* NSAffineTransform_Shearing.m in Sources */,
@@ -3193,9 +3195,9 @@
 				0CCABAE614A3E2BD0014410F /* main.m in Sources */,
 				0C20190714A3E5E10022568C /* ClassicController.m in Sources */,
 				0C20190B14A3E5E10022568C /* ClassicSimulator.m in Sources */,
+				057DA6B21E09F0C600AE4D1A /* utils.c in Sources */,
 				0C20190F14A3E5E10022568C /* proc_classic.c in Sources */,
 				0C20194A14A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20195A14A3E86C0022568C /* utils.c in Sources */,
 				0C20196F14A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20197B14A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20198914A3E8DC0022568C /* NSAffineTransform_Shearing.m in Sources */,
@@ -3209,9 +3211,9 @@
 				0CCABAE714A3E2BD0014410F /* main.m in Sources */,
 				0C20190814A3E5E10022568C /* ClassicController.m in Sources */,
 				0C20190C14A3E5E10022568C /* ClassicSimulator.m in Sources */,
+				057DA6B31E09F0C700AE4D1A /* utils.c in Sources */,
 				0C20191014A3E5E10022568C /* proc_classic.c in Sources */,
 				0C20194B14A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20195B14A3E86C0022568C /* utils.c in Sources */,
 				0C20197014A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20197C14A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20198A14A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
@@ -3225,9 +3227,9 @@
 				0CCABAE814A3E2BD0014410F /* main.m in Sources */,
 				0C20190914A3E5E10022568C /* ClassicController.m in Sources */,
 				0C20190D14A3E5E10022568C /* ClassicSimulator.m in Sources */,
+				057DA6BD1E09F0D100AE4D1A /* utils.c in Sources */,
 				0C20191114A3E5E10022568C /* proc_classic.c in Sources */,
 				0C20194C14A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20195C14A3E86C0022568C /* utils.c in Sources */,
 				0C20197114A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20197D14A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20198B14A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
@@ -3240,10 +3242,10 @@
 			files = (
 				0CCABAE914A3E2BD0014410F /* main.m in Sources */,
 				0C20194D14A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20195D14A3E86C0022568C /* utils.c in Sources */,
 				0C20197214A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20197E14A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20198C14A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6BC1E09F0D000AE4D1A /* utils.c in Sources */,
 				0C20199614A3E8EE0022568C /* TransparentWindow.m in Sources */,
 				0C2019A614A3EB180022568C /* proc_woodstock.c in Sources */,
 				0C2019C214A3EB440022568C /* WoodstockController.m in Sources */,
@@ -3257,10 +3259,10 @@
 			files = (
 				0CCABAEA14A3E2BD0014410F /* main.m in Sources */,
 				0C20194E14A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20195E14A3E86C0022568C /* utils.c in Sources */,
 				0C20197314A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20197F14A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20198D14A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6BB1E09F0CF00AE4D1A /* utils.c in Sources */,
 				0C20199714A3E8EE0022568C /* TransparentWindow.m in Sources */,
 				0C2019A714A3EB180022568C /* proc_woodstock.c in Sources */,
 				0C2019C314A3EB440022568C /* WoodstockController.m in Sources */,
@@ -3274,10 +3276,10 @@
 			files = (
 				0CCABAEB14A3E2BD0014410F /* main.m in Sources */,
 				0C20194F14A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20195F14A3E86C0022568C /* utils.c in Sources */,
 				0C20197414A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20198014A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20198E14A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6BA1E09F0CF00AE4D1A /* utils.c in Sources */,
 				0C20199814A3E8EE0022568C /* TransparentWindow.m in Sources */,
 				0C2019A814A3EB180022568C /* proc_woodstock.c in Sources */,
 				0C2019B214A3EB280022568C /* SpiceController.m in Sources */,
@@ -3291,10 +3293,10 @@
 			files = (
 				0CCABAEC14A3E2BD0014410F /* main.m in Sources */,
 				0C20195014A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196014A3E86C0022568C /* utils.c in Sources */,
 				0C20197514A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20198114A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20198F14A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6B91E09F0CE00AE4D1A /* utils.c in Sources */,
 				0C20199914A3E8EE0022568C /* TransparentWindow.m in Sources */,
 				0C2019A914A3EB180022568C /* proc_woodstock.c in Sources */,
 				0C2019B314A3EB280022568C /* SpiceController.m in Sources */,
@@ -3308,10 +3310,10 @@
 			files = (
 				0CCABAED14A3E2BD0014410F /* main.m in Sources */,
 				0C20195114A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196114A3E86C0022568C /* utils.c in Sources */,
 				0C20197614A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20198214A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20199014A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6B81E09F0CD00AE4D1A /* utils.c in Sources */,
 				0C20199A14A3E8EE0022568C /* TransparentWindow.m in Sources */,
 				0C2019AA14A3EB180022568C /* proc_woodstock.c in Sources */,
 				0C2019B414A3EB280022568C /* SpiceController.m in Sources */,
@@ -3325,10 +3327,10 @@
 			files = (
 				0CCABAEE14A3E2BD0014410F /* main.m in Sources */,
 				0C20195214A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196214A3E86C0022568C /* utils.c in Sources */,
 				0C20197714A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20198314A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20199114A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6B71E09F0CD00AE4D1A /* utils.c in Sources */,
 				0C20199B14A3E8EE0022568C /* TransparentWindow.m in Sources */,
 				0C2019AB14A3EB180022568C /* proc_woodstock.c in Sources */,
 				0C2019B514A3EB280022568C /* SpiceController.m in Sources */,
@@ -3342,10 +3344,10 @@
 			files = (
 				0CCABAEF14A3E2BD0014410F /* main.m in Sources */,
 				0C20195314A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196314A3E86C0022568C /* utils.c in Sources */,
 				0C20197814A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20198414A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20199214A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6B61E09F0CC00AE4D1A /* utils.c in Sources */,
 				0C20199C14A3E8EE0022568C /* TransparentWindow.m in Sources */,
 				0C2019AC14A3EB180022568C /* proc_woodstock.c in Sources */,
 				0C2019B614A3EB280022568C /* SpiceController.m in Sources */,
@@ -3359,10 +3361,10 @@
 			files = (
 				0CCABAF014A3E2BD0014410F /* main.m in Sources */,
 				0C20195414A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196414A3E86C0022568C /* utils.c in Sources */,
 				0C20197914A3E8A50022568C /* LEDDigit.m in Sources */,
 				0C20198514A3E8A50022568C /* LEDDisplayView.m in Sources */,
 				0C20199314A3E8DD0022568C /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6B51E09F0CC00AE4D1A /* utils.c in Sources */,
 				0C20199D14A3E8EE0022568C /* TransparentWindow.m in Sources */,
 				0C2019AD14A3EB180022568C /* proc_woodstock.c in Sources */,
 				0C2019B714A3EB280022568C /* SpiceController.m in Sources */,
@@ -3375,16 +3377,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				0CCABAF114A3E2BD0014410F /* main.m in Sources */,
+				057DA6A91E09F0B300AE4D1A /* proc_nut.c in Sources */,
 				0C20195514A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196514A3E86C0022568C /* utils.c in Sources */,
 				0C20199E14A3E8EE0022568C /* TransparentWindow.m in Sources */,
-				0C04F22114A47A97006FD07E /* proc_nut.c in Sources */,
-				0C04F22514A47A97006FD07E /* voyager_lcd.c in Sources */,
 				0C04F22914A47A97006FD07E /* VoyagerController.m in Sources */,
 				0C04F22D14A47A97006FD07E /* VoyagerDigit.m in Sources */,
 				0C04F23114A47A97006FD07E /* VoyagerDisplayView.m in Sources */,
 				0C04F23514A47A97006FD07E /* VoyagerSimulator.m in Sources */,
 				0C04F23C14A47AC8006FD07E /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6AD1E09F0B800AE4D1A /* voyager_lcd.c in Sources */,
+				057DA6B41E09F0CB00AE4D1A /* utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3393,16 +3395,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				0CCABAF214A3E2BD0014410F /* main.m in Sources */,
+				057DA6AA1E09F0B400AE4D1A /* proc_nut.c in Sources */,
 				0C20195614A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196614A3E86C0022568C /* utils.c in Sources */,
 				0C20199F14A3E8EE0022568C /* TransparentWindow.m in Sources */,
-				0C04F22214A47A97006FD07E /* proc_nut.c in Sources */,
-				0C04F22614A47A97006FD07E /* voyager_lcd.c in Sources */,
 				0C04F22A14A47A97006FD07E /* VoyagerController.m in Sources */,
 				0C04F22E14A47A97006FD07E /* VoyagerDigit.m in Sources */,
 				0C04F23214A47A97006FD07E /* VoyagerDisplayView.m in Sources */,
 				0C04F23614A47A97006FD07E /* VoyagerSimulator.m in Sources */,
 				0C04F23B14A47AC7006FD07E /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6AE1E09F0B800AE4D1A /* voyager_lcd.c in Sources */,
+				057DA6BE1E09F0D200AE4D1A /* utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3411,16 +3413,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				0CCABAF314A3E2BD0014410F /* main.m in Sources */,
+				057DA6AB1E09F0B400AE4D1A /* proc_nut.c in Sources */,
 				0C20195714A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196714A3E86C0022568C /* utils.c in Sources */,
 				0C2019A014A3E8EE0022568C /* TransparentWindow.m in Sources */,
-				0C04F22314A47A97006FD07E /* proc_nut.c in Sources */,
-				0C04F22714A47A97006FD07E /* voyager_lcd.c in Sources */,
 				0C04F22B14A47A97006FD07E /* VoyagerController.m in Sources */,
 				0C04F22F14A47A97006FD07E /* VoyagerDigit.m in Sources */,
 				0C04F23314A47A97006FD07E /* VoyagerDisplayView.m in Sources */,
 				0C04F23714A47A97006FD07E /* VoyagerSimulator.m in Sources */,
 				0C04F23A14A47AC6006FD07E /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6AF1E09F0B900AE4D1A /* voyager_lcd.c in Sources */,
+				057DA6BF1E09F0D300AE4D1A /* utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3429,16 +3431,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				0CCABAF414A3E2BD0014410F /* main.m in Sources */,
+				057DA6AC1E09F0B500AE4D1A /* proc_nut.c in Sources */,
 				0C20195814A3E86C0022568C /* digit_ops.c in Sources */,
-				0C20196814A3E86C0022568C /* utils.c in Sources */,
 				0C2019A114A3E8EE0022568C /* TransparentWindow.m in Sources */,
-				0C04F22414A47A97006FD07E /* proc_nut.c in Sources */,
-				0C04F22814A47A97006FD07E /* voyager_lcd.c in Sources */,
 				0C04F22C14A47A97006FD07E /* VoyagerController.m in Sources */,
 				0C04F23014A47A97006FD07E /* VoyagerDigit.m in Sources */,
 				0C04F23414A47A97006FD07E /* VoyagerDisplayView.m in Sources */,
 				0C04F23814A47A97006FD07E /* VoyagerSimulator.m in Sources */,
 				0C04F23914A47AC6006FD07E /* NSAffineTransform_Shearing.m in Sources */,
+				057DA6B01E09F0B900AE4D1A /* voyager_lcd.c in Sources */,
+				057DA6C01E09F0D300AE4D1A /* utils.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

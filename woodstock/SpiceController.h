@@ -24,7 +24,7 @@
 //  nonpareil
 //
 //  Created by Maciej Bartosiak on 2005-10-26.
-//  Copyright 2005-2012 Maciej Bartosiak.
+//  Copyright Maciej Bartosiak 2005.
 //
 
 #import <Cocoa/Cocoa.h>
@@ -40,10 +40,6 @@
 	NSTimer		    *timer;
 	NSMutableArray	*keyQueue;
 }
-#if (!defined (NONPAREIL_32E))
-@property (strong) IBOutlet NSButton *modeSwitch;
-#endif
-
 - (IBAction)buttonPressed:(id)sender;
 - (IBAction)modeSwitch:(id)sender;
 - (void)run:(NSTimer *)aTimer;
