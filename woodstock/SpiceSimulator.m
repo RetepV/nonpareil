@@ -40,7 +40,7 @@
 	NSBundle *nonpareilBundle = [NSBundle mainBundle];
 	NSString *objFile = [nonpareilBundle pathForResource: NNPR_OBJ ofType:@"obj"];
 	
-	cpu = spice_new_processor (NNPR_RAM, (void *)display);
+	cpu = spice_new_processor (NNPR_RAM, (__bridge void *)display);
 	woodstock_read_object_file (cpu, [objFile cString]);
 //#ifdef NONPAREIL_33C
 //	woodstock_set_ext_flag(cpu,3,true);
@@ -123,6 +123,6 @@ void display_callback(struct act_reg_t *ar)
 	if (memcmp( o_display_segments, ar->display_segments, MAX_DIGIT_POSITION * sizeof(segment_bitmap_t)))
 	{
 		memcpy( o_display_segments, ar->display_segments, MAX_DIGIT_POSITION * sizeof(segment_bitmap_t));
-		[(LEDDisplayView *)ar->display updateDisplay];
+        [(__bridge LEDDisplayView *)ar->display updateDisplay];
 	}
 }

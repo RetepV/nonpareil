@@ -91,7 +91,6 @@
 												  y: y];
 		
 		[tmp insertObject: dig atIndex: i];
-		[dig release];
 		xOff += (digitWidth + digitOffset);
 	}
 	

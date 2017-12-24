@@ -49,11 +49,11 @@
 	[NSBezierPath setDefaultLineWidth: stroke];
 	//[NSBezierPath setDefaultLineCapStyle: NSRoundLineCapStyle];
 	
-	a = [[NSBezierPath bezierPath] retain];
+    a = [NSBezierPath bezierPath];
 	[a moveToPoint:			NSMakePoint(    0.0, digitH)];
 	[a relativeLineToPoint:	NSMakePoint( digitW,    0.0)];
 	
-	b = [[NSBezierPath bezierPath] retain];
+    b = [NSBezierPath bezierPath];
 	[b moveToPoint:			NSMakePoint( digitW, digitH)];
 	[b relativeLineToPoint:	NSMakePoint(    0.0,-digith)];
 	
@@ -81,12 +81,12 @@
 	[tmp scaleXBy: -1.0 yBy: -1.0];
 	[f transformUsingAffineTransform: tmp];
 	
-	g = [[NSBezierPath bezierPath] retain];
+    g = [NSBezierPath bezierPath];
 	[g moveToPoint:			NSMakePoint(   0.0, digith)];
 	[g relativeLineToPoint:	NSMakePoint(digitW,    0.0)];
 	
 	// "dot" segment
-	h = [[NSBezierPath bezierPath] retain];
+    h = [NSBezierPath bezierPath];
 	[h moveToPoint:			NSMakePoint(digitW+dotOff, -1.0)];
 	[h relativeLineToPoint:	NSMakePoint(           0.0, 2.0)];
 	[h relativeMoveToPoint:	NSMakePoint(          -1.0, 0.0)];
@@ -95,7 +95,7 @@
 	
 	// "," segment
 	
-	i = [[NSBezierPath bezierPath] retain];
+    i = [NSBezierPath bezierPath];
 	[i moveToPoint:			NSMakePoint(digitW + dotOff, 0.0 /*-DIGIT_o*/)];
 	[i relativeLineToPoint:	NSMakePoint(    -dotOff/3.0,      -dotOff/2.0)];
 	

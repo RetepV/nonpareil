@@ -54,11 +54,11 @@
 				  digitStroke: 1.3
 					dotOffset: 5.0];
 	
-	timer = [[NSTimer scheduledTimerWithTimeInterval:(1.0/JIFFY_PER_SEC)
+	timer = [NSTimer scheduledTimerWithTimeInterval:(1.0/JIFFY_PER_SEC)
 											  target:self
 											selector:@selector(run:)
 											userInfo:nil
-											 repeats:YES] retain];
+											 repeats:YES];
 	
 }
 

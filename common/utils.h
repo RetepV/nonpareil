@@ -32,8 +32,8 @@
 #define EXPSIZE 3  // two exponent and one exponent sign digit
 
 typedef digit_t reg_t [WSIZE];
-typedef uint32_t addr_t;
-typedef uint16_t rom_word_t;
+//typedef uint32_t addr_t;
+//typedef uint16_t rom_word_t;
 
 void *alloc (size_t size);
 void trim_trailing_whitespace (char *s);

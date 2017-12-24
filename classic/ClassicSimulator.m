@@ -41,7 +41,7 @@
 	NSBundle *nonpareilBundle = [NSBundle mainBundle];
 	NSString *objFile = [nonpareilBundle pathForResource: NNPR_OBJ ofType:@"obj"];
 	
-	cpu = classic_new_processor (NNPR_RAM, (void *)display);
+    cpu = classic_new_processor (NNPR_RAM, (__bridge void *)display);
 	classic_read_object_file (cpu, [objFile cString]);
 	
 	lastRun = [NSDate timeIntervalSinceReferenceDate];
@@ -124,7 +124,7 @@ void display_callback(struct classic_cpu_reg_t *cr)
 	if (memcmp( o_display_segments, cr->display_segments, MAX_DIGIT_POSITION * sizeof(segment_bitmap_t)))
 	{
 		memcpy( o_display_segments, cr->display_segments, MAX_DIGIT_POSITION * sizeof(segment_bitmap_t));
-		[(LEDDisplayView *)cr->display updateDisplay];
+        [(__bridge LEDDisplayView *)cr->display updateDisplay];
 	}
 }
 

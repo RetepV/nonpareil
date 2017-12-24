@@ -26,7 +26,7 @@
 #include <string.h>
 
 //#include "arch.h"
-#include "macutil.h"
+#include "utils.h"
 #include "display.h"
 #include "proc.h"
 
