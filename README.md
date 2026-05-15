@@ -10,4 +10,6 @@ NOTES:
 
 In this branch, I have added support for building the 11C, 12C, 15C and 16C emulators for iOS. Check out this branch, navigate to the `iOS` folder, open the `nonpareil-ios.xcodeproj`, choose the target you want (e.g. `nonpareil-ios-16c`), and build.
 
+Only landscape mode is supported, by the way.
+
 This was created long ago with XCode 3.2. But I just tested it and it still compiles and runs when using XCode 26.4.1.
